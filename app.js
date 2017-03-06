@@ -7,7 +7,7 @@ client.on('ready', () => {
   console.log('I am ready !');
   
   var channel = client.channels.find("name", "general");
-  channel.sendMessage("Hello I am bunnyBot !");
+  channel.sendMessage("Hello I am connected !");
 });
 
 client.on('message', msg => {
