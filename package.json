@@ -4,8 +4,11 @@
   "description": "An awesome bot for Discord!",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Test\""
   },
   "author": "Ace-Nanter",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "discord.js" : "*"
+  }
 }
