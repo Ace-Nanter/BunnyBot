@@ -17,7 +17,5 @@ exports.launchBot = function( Discord, token ) {
             msg.reply('I love bunnies !');
         }
     });
-
-    console.log(token);
     client.login(token);
 }
