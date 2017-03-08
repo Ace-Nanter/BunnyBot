@@ -1,7 +1,5 @@
-const config = require('./config/config.js');
-var Discord = require('discord.js');
+// App launching
 
-var bot = require('./bot/bot.js');
-const token = config.token;
 
-bot.launchBot(Discord, token);
+// Launch Discord bot
+require('./src/bot');

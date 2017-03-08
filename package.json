@@ -9,6 +9,12 @@
   "author": "Ace-Nanter",
   "license": "MIT",
   "dependencies": {
-    "discord.js": "^11.0.0"
+    "discord.js": "^11.0.0",
+    "glob": "^7.1.1",
+    "ramda": "^0.23.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ace-Nanter/BunnyBot.git"
   }
 }
