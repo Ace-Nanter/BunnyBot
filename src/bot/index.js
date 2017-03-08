@@ -9,7 +9,7 @@ var bot = new Discord.Client();
 
 bot.on('ready', () => {
     console.log('Bot launched.');
-    
+
     bot.user.setGame("Improve myself");
 });
 
@@ -25,20 +25,28 @@ bot.on('message', msg => {
     // If a command has been called
     if(msg.content[0] === config.PREFIX) {
 
-        console.log('command called : ' + msg.content);
-
         // Get command
-        const commandName = msg.content.toLowerCase().split(' ')[0].substring(1);
+        const commandName = msg.content.split(' ')[0].substring(1);
 
-        // Get arguments
-        const args = msg.content.substring(commandName.length + 2);
+        console.log('command called : ' + commandName);
 
         // Look for a corresponding command
         const command = commands.commands[commandName];
 
-        // Run command
-        command();
+        // Get context
+        const context = 
+        {
+            msg: msg,
+            args: msg.content.substring(commandName.length + 2)
+        };
 
+        if(command) {
+            // Run command
+            command(context);
+        }
+        else {
+            console.log('No command found !');
+        }
     }
 
     // If the bot has been mentionned
