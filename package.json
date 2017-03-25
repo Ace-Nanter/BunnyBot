@@ -10,8 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "discord.js": "^11.0.0",
-    "glob": "^7.1.1",
-    "ramda": "^0.23.0"
+    "mysql": "*"
   },
   "repository": {
     "type": "git",

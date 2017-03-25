@@ -5,10 +5,16 @@
 var fs = require('fs');
 var path = require('path');
 
+// Files to exclude
+var regExcludes = [/index.js/g];
+
+// Path to analyze
+var DIR = path.join(__dirname, 'src', 'bot', 'commands');
+
+/** Look for commands */
 var lookForCommands = function (dir, regExcludes, done) {
 
   var results = {};
-
   fs.readdir(dir, function (err, list) {
 
     // Error occured
@@ -67,10 +73,6 @@ var lookForCommands = function (dir, regExcludes, done) {
   });
 };
 
-// Files to exclude
-var regExcludes = [/index.js/g];
-
-var DIR = path.join(__dirname, 'src', 'bot', 'commands');
 lookForCommands(__dirname, regExcludes, function(err, results) {
   if (err) {
     throw err;
@@ -78,4 +80,3 @@ lookForCommands(__dirname, regExcludes, function(err, results) {
 
   exports.commands = results;
 });
-

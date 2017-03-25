@@ -1,0 +1,3 @@
+/**
+ * Manage roles in database
+ */

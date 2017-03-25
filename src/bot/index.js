@@ -9,11 +9,11 @@ var bot = new Discord.Client();
 
 bot.on('ready', () => {
     console.log('Bot launched.');
-
-    bot.user.setGame("Improve myself");
 });
 
 bot.on('message', msg => {
+
+    // TODO : get user with all his information FROM DATABASE AND Discord. If user doesn't exist in DB, create him.
 
     if (msg.content === 'ping') {
         msg.channel.sendMessage("pong !");
@@ -37,6 +37,7 @@ bot.on('message', msg => {
         const context = 
         {
             msg: msg,
+            bot: bot,
             args: msg.content.substring(commandName.length + 2)
         };
 
