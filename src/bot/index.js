@@ -3,21 +3,26 @@
 var Discord = require('discord.js');
 const config = require('../../config/config.json');
 const commands = require('./commands/');
+const permissions = require('./permissions.js');
 
 // Launch the bot
 var bot = new Discord.Client();
 
 bot.on('ready', () => {
+   
     console.log('Bot launched.');
 });
 
 bot.on('message', msg => {
 
-    // TODO : get user with all his information FROM DATABASE AND Discord. If user doesn't exist in DB, create him.
+    if(msg.channel.type === 'dm') {
+        // Private message to BunnyBot
+    }
 
     if (msg.content === 'ping') {
         msg.channel.sendMessage("pong !");
     }
+
     if(msg.content.match(/bunny/g)) {
         msg.reply('I love bunnies !');
     }
@@ -26,7 +31,7 @@ bot.on('message', msg => {
     if(msg.content[0] === config.PREFIX) {
 
         // Get command
-        const commandName = msg.content.split(' ')[0].substring(1);
+        const commandName = msg.content.split(' ')[0].substring(1).toLowerCase();
 
         console.log('command called : ' + commandName);
 
@@ -42,11 +47,22 @@ bot.on('message', msg => {
         };
 
         if(command) {
-            // Run command
-            command(context);
+            // Command exists
+            permissions.checkPermissions(commandName, msg.member, function(authorized) {
+                if(authorized) {
+                    // The user is authorized
+                    command(context);
+                }
+                else {
+                    // The user is not authorized
+                    msg.reply('sorry you are not authorized to use this command! :frowning:');
+                }
+            });
         }
         else {
+            // Command doesn't exist
             console.log('No command found !');
+            // TODO : add a message from the bot
         }
     }
 
@@ -58,8 +74,6 @@ bot.on('message', msg => {
             msg.channel.sendMessage('I\'ve heard my name?');
         }
     }
-
-
 });
 
 bot.login(config.TOKEN);

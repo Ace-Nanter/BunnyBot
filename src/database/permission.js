@@ -1,16 +1,16 @@
 /**
- * Manage roles in database
+ * Manage permissions for features in database
  */
 
 const connectionManager = require('.');
 
+/**
+ * Get the permissions necessary for a given feature.
+ * @param {*} feature Given feature.
+ */
+var getPermissions = function(feature, callback) {
 
-var storeRoles = function(roles) {
-
-    var req = `INSERT INTO roles(idRole, roleName, idServer, permissions) VALUES ?
-        ON DUPLICATE KEY UPDATE
-            roleName    = VALUES(roleName),
-            permissions = VALUES(permissions)`;
+    var req = `SELECT permission FROM features WHERE nameFeature = ?`;
 
     // Get connection
     connectionManager.getConnection(function(err, connection) {
@@ -20,12 +20,15 @@ var storeRoles = function(roles) {
             console.log('Error while accessing the database: ' + err);
         }
 
-        query = connection.query(req, [roles], function (queryError) {
+        // Execute request
+        connection.query(req, feature, function (queryError, results) {
+
             if (queryError) {
                 console.log('An error occured: ' + queryError);
+                callback(null);
             }
             else {
-                console.log(roles.length + " roles updated in database.");
+                callback(results);
             }
         });
 
@@ -33,4 +36,4 @@ var storeRoles = function(roles) {
     });
 }
 
-exports.storeRoles = storeRoles;
+exports.getPermissions = getPermissions;

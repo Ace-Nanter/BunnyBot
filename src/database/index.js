@@ -11,6 +11,9 @@ var fs = require('fs');
 
 var pool = null;
 
+/**
+ * Initialize connection with the database
+ */
 var init = function() {
     pool = mysql.createPool({
         connectionLimit: 100,
@@ -27,13 +30,19 @@ var init = function() {
     });
 }
 
-var test = function() {
-    pool.getConnection(function(err, connection) {
-        if(err) {
-            console.log('Error :' + err);
-        }
+// Launch init
+init();
 
-        connection.query("SELECT * FROM users", function(err, rows) {
+var getConnection = function(callback) {
+    pool.getConnection(function(err, connection) {
+        callback(err, connection);
+    });
+}
+
+var test = function(err, connection) {
+
+    pool.getConnection(function(err, connection) {
+        connection.query("SELECT * FROM roles", function(err, rows) {
             connection.release();
             if(!err) {
                 console.log(rows);
@@ -41,9 +50,12 @@ var test = function() {
             else {
                 console.log('Error : ' + err);
             }
-        })
-    })
+        });
+    });
+
+    
 }
 
 exports.init = init;
+exports.getConnection = getConnection;
 exports.test = test;

@@ -13,4 +13,4 @@ function sayHello(context) {
     }
 }
 
-exports.sayHello = sayHello;
+exports.sayhello = sayHello;
