@@ -4,6 +4,7 @@
 
 var fs = require('fs');
 var path = require('path');
+const permissions = require('../permissions.js');
 
 // Files to exclude
 var regExcludes = [/index.js/g];
@@ -12,7 +13,7 @@ var regExcludes = [/index.js/g];
 var DIR = path.join(__dirname, 'src', 'bot', 'commands');
 
 /** Look for commands */
-var lookForCommands = function (dir, regExcludes, done) {
+var getCommands = function (dir, regExcludes, done) {
 
   var results = {};
   fs.readdir(dir, function (err, list) {
@@ -44,7 +45,7 @@ var lookForCommands = function (dir, regExcludes, done) {
           if (stat && stat.isDirectory()) {
 
             // If it is, walk again
-            lookForCommands(file, regExcludes, function (err, res) {
+            getCommands(file, regExcludes, function (err, res) {
               for(var key in res) {
                 results[key] = res[key];
               }
@@ -73,10 +74,41 @@ var lookForCommands = function (dir, regExcludes, done) {
   });
 };
 
-lookForCommands(__dirname, regExcludes, function(err, results) {
-  if (err) {
-    throw err;
-  }
+getCommands(__dirname, regExcludes, function(err, results) {
+    if (err) {
+      throw err;
+    }
 
-  exports.commands = results;
+    exports.commands = results;
 });
+
+var lookForCommand = function(cmdName) {
+
+    // Look for a corresponding command
+    const command = exports.commands[cmdName];
+
+    return command;
+}
+
+var executeCommand = function(command, commandName, context) {
+
+    const channel = context.msg.channel;
+    const user = context.msg.member;
+
+    permissions.checkPermissions(commandName, user, function(authorized) {
+        if(authorized) {
+            // The user is authorized
+            command(context);
+        }
+        else {
+            // The user is not authorized
+            console.log(user.name + ' can\'t use this command!');
+            channel.sendMessage('Sorry you are not authorized to use this command! :frowning:');
+        }
+    });
+}
+
+module.exports = {
+  lookForCommand: lookForCommand,
+  executeCommand: executeCommand
+}

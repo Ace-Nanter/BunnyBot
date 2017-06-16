@@ -10,36 +10,42 @@ const ownerId = require('../../config/config.json')['OWNER_ID'];
  */
 var checkPermissions = function( feature, member, callback ) {
 
-    permissionManager.getPermissions(feature, function(results) {
-        if(results && results.length == 1) {
-            // There is only one permission : it is ok.
-            var permission = results[0].permission;
+    if(!member) {
+        // Private message
+        callback(true);
+    }
+    else {
+        permissionManager.getPermissions(feature, function(results) {
+            if(results && results.length == 1) {
+                // There is only one permission : it is ok.
+                var permission = results[0].permission;
 
-            if(permission === 0) {
-                // TODO : improve this part
-                callback(member.user.id === ownerId);
+                if(permission === 0) {
+                    // TODO : improve this part
+                    callback(member.user.id === ownerId);
+                }
+                else {
+                    // Return is user is authorized or not
+                    callback(member.hasPermission(permission));
+                }
+
+                
+            }
+            else if(results.length > 1) {
+                // Several permissions has been found
+                console.log('Error: several permissions found!');
+
+                // Return false by default
+                callback(false);
             }
             else {
-                // Return is user is authorized or not
-                callback(member.hasPermission(permission));
+                // No permission has been found
+                console.log('Error: no permissions found for command ' + feature + '!');
+
+                // Return false
+                callback(false);
             }
-
-            
-        }
-        else if(results.length > 1) {
-            // Several permissions has been found
-            console.log('Error: several permissions found!');
-
-            // Return false by default
-            callback(false);
-        }
-        else {
-            // No permission has been found
-            console.log('Error: no permissions found for command ' + feature + '!');
-
-            // Return false
-            callback(false);
-        }
-    });
+        });
+    }   
 }
 exports.checkPermissions = checkPermissions;

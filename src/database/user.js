@@ -1,3 +1,0 @@
-/**
- * Manage users in database
- */
