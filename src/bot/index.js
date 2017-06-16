@@ -4,12 +4,18 @@ var Discord = require('discord.js');
 const config = require('../../config/config.json');
 const commands = require('./commands/');
 const permissions = require('./permissions.js');
+const reactionsManager = require('../database/reactions.js')
 
 // Launch the bot
 var bot = new Discord.Client();
 
 bot.on('ready', () => {
-   
+
+    // Get reactions
+    bot.guilds.forEach(function(guild) {
+        reactionsManager.loadReactions(guild.id);
+    });
+
     console.log('Bot launched.');
 });
 
@@ -42,7 +48,7 @@ bot.on('message', msg => {
         else {
             // Command doesn't exist
             console.log('No command found !');
-            msg.channel.sendMessage('Sorry I can\'t understand what you mean ! : worried:');
+            msg.channel.sendMessage('Sorry I can\'t understand what you mean ! :worried:');
         }
     }
     else {
@@ -65,12 +71,29 @@ bot.on('message', msg => {
  * @param {Message} msg Message received
  */
 var react = function(msg) {
-    if (msg.content === 'ping') {
-        msg.channel.sendMessage("pong !");
-    }
+    
+    var server = msg.guild;
+    var reactions = reactionsManager.reactions[msg.guild.id];
 
-    if(msg.content.match(/bunny/g)) {
-        msg.reply('I love bunnies !');
+    // Get the right selected reaction
+    var selectedReaction = null;
+
+    if(reactions && reactions.length > 0) {
+        reactions.forEach(function(reaction) {
+            if(reaction.trigger === msg.content) {
+                selectedReaction = reaction;
+            }
+        });
+
+        // If we have a reaction, answer
+        if(selectedReaction) {
+            if(selectedReaction.isReply) {
+                msg.reply(selectedReaction.answer);
+            }
+            else {
+                msg.channel.sendMessage(selectedReaction.answer);
+            }
+        }
     }
 }
 

@@ -16,7 +16,7 @@ var pool = null;
  */
 var init = function() {
     pool = mysql.createPool({
-        connectionLimit: 100,
+        connectionLimit: 10,
         host: process.env.HOST,
         user: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
