@@ -23,23 +23,30 @@ function addReaction(context) {
         // Test if everything is ok
         if(trigger && answer && trigger.length > 0 && answer.length > 0) {
 
-            // Create reaction object
-            var reaction = {
-                trigger: trigger,
-                answer: answer,
-                isReply: false,
-                server: server.id
-            };
+            // Check there isn't already a reaction with such a trigger
+            if (reactionsManager.reactions[server.id].filter(r => r.trigger === trigger).length <= 0) {
+                // Create reaction object
+                var reaction = {
+                    trigger: trigger,
+                    answer: answer,
+                    isReply: false,
+                    server: server.id
+                };
 
-            // Store into the database
-            reactionsManager.addReaction(reaction, function(queryError) {
-                if(queryError) {
-                    channel.sendMessage("Sorry, something went wrong... :sob:");
-                }
-                else {
-                    channel.sendMessage("Reaction added! :smiley:");
-                }
-            });
+                // Store into the database
+                reactionsManager.addReaction(reaction, function(queryError) {
+                    if(queryError) {
+                        channel.sendMessage("Sorry, something went wrong... :sob:");
+                    }
+                    else {
+                        channel.sendMessage("Reaction added! :smiley:");
+                    }
+                });
+            }
+            else {
+                channel.sendMessage("Sorry that trigger is already used... :frowning:");
+            }
+            
         }
         else {
             console.log('Error using command : not enough arguments !')

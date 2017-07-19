@@ -1,7 +1,7 @@
 /** This file provides methods to manage permissions */
 
 const permissionManager = require('../database/permission.js')
-const ownerId = require('../../config/config.json')['OWNER_ID'];
+const OWNER_ID = require('../../config/config.json')['OWNER_ID'];
 
 /**
  * Verify that a given member can use a given feature of the bot.
@@ -22,11 +22,11 @@ var checkPermissions = function( feature, member, callback ) {
 
                 if(permission === 0) {
                     // TODO : improve this part
-                    callback(member.user.id === ownerId);
+                    callback(member.user.id === OWNER_ID);
                 }
                 else {
                     // Return is user is authorized or not
-                    callback(member.hasPermission(permission));
+                    callback(member.hasPermission(permission) || member.user.id === OWNER_ID);
                 }
 
                 

@@ -4,17 +4,16 @@ var Discord = require('discord.js');
 const config = require('../../config/config.json');
 const commands = require('./commands/');
 const permissions = require('./permissions.js');
-const reactionsManager = require('../database/reactions.js')
+const subscriptionManager = require('./subscribers');
+const reactions = require('./subscribers/reactions.js');
 
 // Launch the bot
 var bot = new Discord.Client();
 
 bot.on('ready', () => {
 
-    // Get reactions
-    bot.guilds.forEach(function(guild) {
-        reactionsManager.loadReactions(guild.id);
-    });
+    // Launch reactions system
+    reactions.initReactions(bot.guilds);
 
     console.log('Bot launched.');
 });
@@ -53,7 +52,7 @@ bot.on('message', msg => {
     }
     else {
         // React to content
-        react(msg);
+        subscriptionManager.react(msg);
     }
 
     // If the bot has been mentionned
@@ -65,36 +64,5 @@ bot.on('message', msg => {
         }
     }
 });
-
-/**
- * Define the reaction to a given message
- * @param {Message} msg Message received
- */
-var react = function(msg) {
-    
-    var server = msg.guild;
-    var reactions = reactionsManager.reactions[msg.guild.id];
-
-    // Get the right selected reaction
-    var selectedReaction = null;
-
-    if(reactions && reactions.length > 0) {
-        reactions.forEach(function(reaction) {
-            if(reaction.trigger === msg.content) {
-                selectedReaction = reaction;
-            }
-        });
-
-        // If we have a reaction, answer
-        if(selectedReaction) {
-            if(selectedReaction.isReply) {
-                msg.reply(selectedReaction.answer);
-            }
-            else {
-                msg.channel.sendMessage(selectedReaction.answer);
-            }
-        }
-    }
-}
 
 bot.login(config.TOKEN);
