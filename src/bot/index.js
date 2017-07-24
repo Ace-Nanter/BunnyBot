@@ -65,4 +65,4 @@ bot.on('message', msg => {
     }
 });
 
-bot.login(config.TOKEN);
+bot.login(process.env.TOKEN);

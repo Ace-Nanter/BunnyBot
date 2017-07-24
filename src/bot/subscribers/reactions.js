@@ -6,7 +6,7 @@ const reactionsManager = require('../../database/reactions.js');
 const subscriptionManager = require('./index.js');
 Subscriber = require('./subscriber.js');
 
-const BOT_ID = require('../../../config/config.json')['BOT_ID'];
+const BOT_ID = process.env.BOT_ID;
 
 /**
  * Get reactions from database

@@ -1,7 +1,7 @@
 /** This file provides methods to manage permissions */
 
 const permissionManager = require('../database/permission.js')
-const OWNER_ID = require('../../config/config.json')['OWNER_ID'];
+const OWNER_ID = process.env.OWNER_ID;
 
 /**
  * Verify that a given member can use a given feature of the bot.
