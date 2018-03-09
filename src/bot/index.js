@@ -6,6 +6,7 @@ const commands = require('./commands/');
 const permissions = require('./permissions.js');
 const subscriptionManager = require('./subscribers');
 const reactions = require('./subscribers/reactions.js');
+const copySystem = require('./subscribers/spy.js');
 
 // Launch the bot
 var bot = new Discord.Client();
@@ -14,13 +15,14 @@ bot.on('ready', () => {
 
     // Launch reactions system
     reactions.initReactions(bot.guilds);
-
+    copySystem.initCopy(bot);
+  
     console.log('Bot launched.');
 });
 
 // For every message posted
 bot.on('message', msg => {
-    
+
     // If a command has been called
     if(msg.content[0] === config.PREFIX) {
 

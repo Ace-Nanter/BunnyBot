@@ -12,11 +12,16 @@
   "author": "Ace-Nanter",
   "license": "MIT",
   "dependencies": {
-    "discord.js": "^11.0.0",
+    "discord.js": "*",
     "mysql": "*"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ace-Nanter/BunnyBot.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/Ace-Nanter/BunnyBot/issues"
+  },
+  "homepage": "https://github.com/Ace-Nanter/BunnyBot#readme",
+  "devDependencies": {}
 }
