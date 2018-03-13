@@ -10,7 +10,7 @@ require('./src/bot');
 var express = require("express");
 var alexa = require("alexa-app");
 
-var PORT = process.env.port || 8080;
+var PORT = process.env.PORT || 8080;
 var app = express();
 
 // ALWAYS setup the alexa app and attach it to express before anything else.
@@ -48,7 +48,7 @@ alexaApp.launch(function(request, response) {
 alexaApp.dictionary = { "names": ["matt", "joe", "bob", "bill", "mary", "jane", "dawn"] };
 
 alexaApp.intent("nameIntent", {
-    "slots": { "NAME": "LITERAL" },
+    "slots": { "NAME": "AMAZON.FirstName" },
     "utterances": [
       "my {name is|name's} {names|NAME}", "set my name to {names|NAME}"
     ]
