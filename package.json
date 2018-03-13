@@ -7,7 +7,8 @@
     "node": "6.11.1"
   },
   "scripts": {
-    "test": "echo \"Test\""
+    "test": "echo \"Test\"",
+    "start": "node app.js"
   },
   "author": "Ace-Nanter",
   "license": "MIT",
