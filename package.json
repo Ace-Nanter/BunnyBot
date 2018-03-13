@@ -13,7 +13,9 @@
   "license": "MIT",
   "dependencies": {
     "discord.js": "*",
-    "mysql": "*"
+    "mysql": "*",
+    "alexa-app": "*",
+    "express": "*"
   },
   "repository": {
     "type": "git",
