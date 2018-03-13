@@ -14,7 +14,7 @@ var PORT = process.env.PORT || 8080;
 var app = express();
 
 // ALWAYS setup the alexa app and attach it to express before anything else.
-var alexaApp = new alexa.app("test");
+var alexaApp = new alexa.app();
 
 alexaApp.express({
   expressApp: app,
@@ -30,7 +30,7 @@ alexaApp.express({
 });
 
 // now POST calls to /test in express will be handled by the app.request() function
-
+/*
 // from here on you can setup any other express routes or middlewares as normal
 app.get('/', function(req, res) {
   res.send("Coucou");
@@ -40,7 +40,7 @@ app.get('/test', function(req, res) {
   res.send("Coucou");
 });
 
-
+*/
 alexaApp.launch(function(request, response) {
   response.say("You launched the app!");
 });
