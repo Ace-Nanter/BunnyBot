@@ -1,104 +1,142 @@
 import * as Discord from 'discord.js'
+import * as mongo from 'mongodb'
+import { exists } from 'fs';
 
 /**
  * Core class for the Bot. Uses Singleton pattern
  */
-export class Bot {
+export class BotCore {
 
+  // Singleton instance
+  private static instance: BotCore;
+
+  // Attributes
   private bot: Discord.Client;
-
-  private static instance: Bot;
-
+  private db: any;
+  
+  /**
+   * Default private constructor
+   */
   private constructor() {
     this.bot = new Discord.Client();
   }
 
   static Instance() {
-    if(!Bot.instance) {
-      Bot.instance = new Bot();
+    if(!BotCore.instance) {
+      BotCore.instance = new BotCore();
     }
 
-    return Bot.instance;
+    return BotCore.instance;
   }
 
-  config: any;
+  config: any = { PREFIX: "+" };
   
   /**
    * Function used to start the bot
    */
-  start() {
+  async start() {
     let self = this;
 
-    this.bot.login(process.env.TOKEN);
-    this.bot.on('ready', function() { self.ready(self.bot); });
-    this.bot.on('message', function(message) { self.onMessage(message, self.bot) });
+    await this.connectToDb();
+
+    if(this.db) {
+      await this.getConfig();
+
+      if(this.config) {
+        this.bot.login(process.env.TOKEN);
+        this.bot.on('ready', function() { self.ready(self.bot); });
+        this.bot.on('message', function(message) { self.onMessage(message, self.bot) });
+      }
+    }
+    else {
+      process.exit(-1);
+    }
+  }
+
+  /**
+   * Connects to the database
+   */
+  private async connectToDb() {
+
+    try {
+      const client = await mongo.MongoClient.connect('' + process.env.DATABASE_URI, { useNewUrlParser: true });
+      this.db = client.db(process.env.DB_NAME);
+    }
+    catch(e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * Get configuration in database
+   */
+  async getConfig() {
+
+    var self = this;
+
+    await this.db.collection('config').find().toArray(function(err: any, configs: any[]) {
+      if(err) {
+        console.error('No configuration found!');
+      }
+      else {
+        if(configs && configs.length > 0) self.config = configs[0];
+      }
+    });
   }
 
   /**
    * Function called when the bot is ready
    */
   ready(bot: Discord.Client) {
-
-    bot.user.setActivity("Trying stuff");    
-
-    //var guild = bot.guilds.get("322508957140910092");
-    var guild = bot.guilds.get("421421602664874004");     // Bunny Server
-    if(guild) {
-      //var user = guild.members.get("207571994538016768");   // Ahsoka
-      var user = guild.members.get("259428340929134592");   // Moi
-
-      if(user && user.voiceChannel) {
-        user.voiceChannel.leave();
-        user.voiceChannel.join().then(connection => {
-          //const dispatcher = connection.playFile("D:\\Ace\\Desktop\\Overwatch\\junkrat.mp3");
-          const dispatcher = connection.playArbitraryInput('http://bingur.github.io/sounds-of-overwatch/vo/vo_hero/Widowmaker/Widowmaker%20-%20Default/fr%20Encore.mp3');
-          //const dispatcher = connection.playFile("D:\\Ace\\Desktop\\Overwatch\\i want to hug you.mp3");
-/*
-          dispatcher.on('error', e => {
-            console.error(e);
-          });
-
-          dispatcher2.on('error', e => {
-            console.error(e);
-          });
-
-          
-          dispatcher.on('end', () => {
-            setTimeout(function(user) {
-              dispatcher2.resume();
-            }, 2000, user);
-          });
-*/
-          dispatcher.on('end', () => {
-            setTimeout(function(user) {
-              user.voiceChannel.leave();
-            }, 1000, user);
-          });
-/*
-          dispatcher2.setVolume(0.5);
-          dispatcher.setVolume(0.5);
-          
-          dispatcher.resume();
-*/
-        }).catch(console.error);
-
-        
-      }
-      
-      else {
-        console.log("user not found");
-      }
-    }
-    else {
-      console.log("guild not found");
-    }    
+    console.log('Bot ready');
+    console.log(this.config);
   }
 
   /**
-   * Function called when a message is received
+   * Function called each time a message is received
+   * @param msg Message received
+   * @param bot Link to the bot client
    */
-  onMessage(message: Discord.Message, bot: Discord.Client) {
-    console.log(message.content);
+  onMessage(msg: Discord.Message, bot: Discord.Client) {
+
+    // If a command has been called
+    if(msg.content[0] === this.config.PREFIX) {
+      
+      console.log("This is a command!");
+
+      /*
+      // Get command name
+      const commandName = msg.content.split(' ')[0].substring(1).toLowerCase();
+
+      // Get command
+      const command = commands.lookForCommand(commandName);
+
+      if(command) {
+          console.log('Command called: ' + commandName);
+
+          // Get context
+          const context = 
+          {
+              msg: msg,
+              bot: bot,
+              pm: msg.channel.type === 'dm',
+              args: msg.content.substring(commandName.length + 2)
+          };
+
+          commands.executeCommand(command, commandName, context);
+          
+      }
+      else {
+          // Command doesn't exist
+          console.log('No command found !');
+          //msg.channel.sendMessage('Sorry I can\'t understand what you mean ! :worried:');
+      }*/
+  }
+  else {
+      // React to content
+      //subscriptionManager.react(msg);
+      console.log("Reaction should be here");
+    }
   }
 }
 
