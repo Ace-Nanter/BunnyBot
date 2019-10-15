@@ -48,8 +48,7 @@ bot.on('message', msg => {
         }
         else {
             // Command doesn't exist
-            console.log('No command found !');
-            msg.channel.sendMessage('Sorry I can\'t understand what you mean ! :worried:');
+            console.warn(`Command not found: ${commandName}`);
         }
     }
     else {
