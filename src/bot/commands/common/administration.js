@@ -17,11 +17,11 @@ var setGame = function(context) {
 
     if(bot && args) {
         if(args === 'null') {
-            bot.user.setGame(null);
+            bot.user.setPresence({status: 'online', game: null });
             console.log('Bot stopped playing');
         }
         else {
-            bot.user.setGame(args);
+            bot.user.setPresence({ game: { name: args} });
             console.log('Bot game set at: ' + args);
         }
         
