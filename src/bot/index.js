@@ -80,7 +80,7 @@ function newYear() {
         && now.getDate() === 1
         && now.getHours() === 0
         && now.getMinutes() === 1) {
-        var channel = bot.channels.get("421421602664874006");
+        var channel = bot.channels.get("322508957140910092");
         channel.send("Happy new year @everyone ! :tada: \nBest wishes to you all ! :smile:");
         
         // kill the loop
