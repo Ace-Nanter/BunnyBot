@@ -77,9 +77,9 @@ function newYear() {
     var now = new Date();
 
     if (now.getMonth() === 0
-        && now.getDate() === 01
-        && now.getHours() === 00
-        && now.getMinutes() === 01) {
+        && now.getDate() === 1
+        && now.getHours() === 0
+        && now.getMinutes() === 1) {
         var channel = bot.channels.get("421421602664874006");
         channel.send("Happy new year @everyone ! :tada: \nBest wishes to you all ! :smile:");
         
