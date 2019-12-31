@@ -10,12 +10,16 @@ const copySystem = require('./subscribers/spy.js');
 
 // Launch the bot
 var bot = new Discord.Client();
+var newYearTimeout;
 
 bot.on('ready', () => {
 
     // Launch reactions system
     reactions.initReactions(bot.guilds);
     copySystem.initCopy(bot);
+
+    newYearTimeout = setTimeout(newYear, 60000 - (new Date() % 60000));
+    newYear(bot);
   
     console.log('Bot launched.');
 });
@@ -67,3 +71,21 @@ bot.on('message', msg => {
 });
 
 bot.login(process.env.TOKEN);
+
+function newYear() {
+
+    var now = new Date();
+
+    if (now.getMonth() === 0
+        && now.getDate() === 01
+        && now.getHours() === 00
+        && now.getMinutes() === 01) {
+        var channel = bot.channels.get("421421602664874006");
+        channel.send("Happy new year @everyone ! :tada: \nBest wishes to you all ! :smile:");
+        
+        // kill the loop
+        clearTimeout(newYearTimeout);
+    }
+
+    now = new Date();
+}
