@@ -1,33 +1,27 @@
 {
-  "name": "bunnybot",
+  "name": "BunnyBot",
   "version": "1.0.0",
-  "description": "An awesome bot for Discord!",
+  "description": "An awesome discord bot !",
   "main": "index.js",
-  "engines": {
-    "node": "6.11.1"
-  },
-  "scripts": {
-    "test": "echo \"Test\"",
-    "tsc": "tsc",
-    "dev": "ts-node-dev --respawn --transpileOnly ./app.ts",
-    "prod": "tsc && node ./build/app.js"
-  },
-  "author": "Ace-Nanter",
-  "license": "MIT",
   "dependencies": {
-    "@types/mongodb": "^3.1.20",
-    "@types/node": "^11.10.0",
-    "discord.js": "*",
-    "mongodb": "^3.1.13",
-    "typescript": "*"
+    "@types/node": "^14.0.19",
+    "discord.js": "github:discordjs/discord.js",
+    "mongodb": "^3.5.9",
+    "typescript": "^3.9.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ace-Nanter/BunnyBot.git"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Ace-Nanter/BunnyBot/issues"
   },
-  "homepage": "https://github.com/Ace-Nanter/BunnyBot#readme",
-  "devDependencies": {}
+  "homepage": "https://github.com/Ace-Nanter/BunnyBot#readme"
 }
