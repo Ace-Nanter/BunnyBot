@@ -40,10 +40,10 @@ export class Logger {
 
     public static error(msg: string) {
         if(Logger.instance) {
-            Logger.instance.warn(msg);
+            Logger.instance.error(msg);
         }
         else {
-            console.warn(msg);
+            console.error(msg);
         }
     }
 

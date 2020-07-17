@@ -1,5 +1,6 @@
 import { MongoDao } from "./mongo-dao";
 import { Logger } from "../logger/logger";
+import { DaoInterface } from "./dao.interface";
 
 export class Dao {
 

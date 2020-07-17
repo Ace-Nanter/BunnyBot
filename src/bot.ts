@@ -1,18 +1,37 @@
 import * as Discord from 'discord.js';
-import { Logger } from './logger/logger';
-import { domain } from 'process';
 import { Dao } from './dao/dao';
-import { ModulesConfig } from './models/config/modules-config.model';
+import { Logger } from './logger/logger';
+import { ModulesListConfig } from './models/config/module-config';
+import { ModuleLoader } from './modules/module-loader';
 
 export class Bot {
 
+    private static Instance : Bot;
     private client: Discord.Client;
 
-    constructor() {
+    
+
+    public static getInstance() {
+        if(!Bot.Instance) {
+            Bot.Instance = new Bot();
+        }
+
+        return Bot.Instance;
+    }
+
+    public static getClient() {
+        return Bot.getInstance().client;
+    }
+
+    public static start() {
+        return Bot.getInstance().start();
+    }
+
+    private constructor() {
         this.client = new Discord.Client;
     }
 
-    public async start() {
+    private async start() {
 
         const self = this;
 
@@ -21,17 +40,21 @@ export class Bot {
 
             // Launch Logger
             self.initLogger().then(() => {
-                self.getConfigs().then(configs => {
+                Dao.getInstance().getModulesConfigs().then(moduleListConfigs => {
+
+                    if(moduleListConfigs && moduleListConfigs.moduleList.length > 0) {
+                        self.loadModules(moduleListConfigs);
+                    }
+                    else {
+                        console.error('Error with modules configuration!');
+                    }
                     
-                    console.log(configs);
-
-                    //self.loadModules(configs[0]);
-
                     Logger.info("Bot started successfully");
                 });
-            });
+            }).catch(error => Logger.error(error));
         });
     
+        /*
         this.client.on('messageReactionAdd', function(messageReaction: Discord.MessageReaction, user: Discord.User) {
             if(messageReaction.message.id === '730433338279723098') {
                 console.log("C'est le bon!");
@@ -42,12 +65,12 @@ export class Bot {
 
         this.client.on('messageReactionRemove', function(messageReaction: Discord.MessageReaction, user: Discord.User) {
             
-        });
+        });*/
 
         this.client.on('disconnect', function() {
             Logger.warn("Disconnecting...");
             this.dao.closeConnection();
-        })
+        });
     }
 
     private async initLogger() {
@@ -59,13 +82,16 @@ export class Bot {
         }
     }
 
-    private getConfigs() : Promise<Config[]> {
-        return Dao.getInstance().getConfigs();
-    }
-
-    private loadModules(modulesConfig: ModulesConfig) {
-        modulesConfig.getModulesNames().forEach(name => {
-            Logger.info(name);
+    private loadModules(modulesConfig: ModulesListConfig) {
+        modulesConfig.moduleList.forEach(moduleConfig => {
+            var module = ModuleLoader.loadModule(moduleConfig);
+            if(module && module.getEventsCovered()) {
+                module.getEventsCovered().forEach(eventType => {
+                    this.client.on(eventType, module.getCallback(eventType));
+                });
+            }
+            
+            Logger.info(moduleConfig.moduleName);
         });
     }
 }
