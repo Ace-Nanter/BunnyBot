@@ -1,8 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { Logger } from '../logger/logger';
-import { resolve } from 'path';
-import { promises } from 'fs';
-import { rejects } from 'assert';
+import { ModulesListConfig } from '../models/config/module-config';
+import { DaoInterface } from './dao.interface';
 
 export class MongoDao implements DaoInterface {
 
@@ -28,9 +27,9 @@ export class MongoDao implements DaoInterface {
         }
     }
 
-    public getConfigs() : Promise<Config[]> {
-        return this.operate(function(db) : Promise<Config[]> {
-            return db.collection('config').find().toArray();
+    public getModulesConfigs() : Promise<ModulesListConfig> {
+        return this.operate(function(db) : Promise<ModulesListConfig> {
+            return db.collection('config').findOne({'name': 'modules'});
         });
     }
 }
