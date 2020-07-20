@@ -2,6 +2,7 @@ import { MongoClient } from 'mongodb';
 import { Logger } from '../logger/logger';
 import { ModulesListConfig } from '../models/config/module-config';
 import { DaoInterface } from './dao.interface';
+import { Game } from '../models/game.model';
 
 export class MongoDao implements DaoInterface {
 
@@ -32,4 +33,11 @@ export class MongoDao implements DaoInterface {
             return db.collection('config').findOne({'name': 'modules'});
         });
     }
+
+    public getGameList() : Promise<Game[]> {
+        return this.operate(function(db) : Promise<Game[]> {
+            return db.collection('games').find().toArray();
+        });
+    }
+
 }
