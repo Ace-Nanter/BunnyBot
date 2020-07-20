@@ -49,6 +49,13 @@ export class Bot {
                         console.error('Error with modules configuration!');
                     }
                     
+                    self.client.user.setStatus('online');
+                    /*self.client.user.setActivity('Being improved!'/*, 
+                    {
+                        type: "WATCHING",
+                        url: 'https://videos.pierreval.ovh'
+                    });*/
+
                     Logger.info("Bot started successfully");
                 });
             }).catch(error => Logger.error(error));
@@ -90,8 +97,6 @@ export class Bot {
                     this.client.on(eventType, module.getCallback(eventType));
                 });
             }
-            
-            Logger.info(moduleConfig.moduleName);
         });
     }
 }
