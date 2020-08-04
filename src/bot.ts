@@ -1,12 +1,12 @@
 import * as Discord from 'discord.js';
+import { Message, MessageMentions } from 'discord.js';
 import { Dao } from './dao/dao';
 import { Logger } from './logger/logger';
-import { ModulesListConfig } from './models/config/module-config';
-import { ModuleLoader } from './modules/common/module-loader';
-import { Message, MessageMentions } from 'discord.js';
 import { CommandContext } from './models/command/command-context.model';
 import { Command } from './models/command/command.model';
 import { Permission } from './models/command/permission.enum';
+import { ModuleLoader } from './modules/common/module-loader';
+import { ModuleConfig } from './models/config/module-config';
 
 export class Bot {
 
@@ -24,6 +24,10 @@ export class Bot {
 
     public static getClient() {
         return Bot.getInstance().client;
+    }
+    
+    public static getId(): Discord.Snowflake{
+        return Bot.getInstance().client.user.id;
     }
 
     public static start() {
@@ -44,10 +48,10 @@ export class Bot {
 
             // Launch Logger
             self.initLogger().then(() => {
-                Dao.getInstance().getModulesConfigs().then(moduleListConfigs => {
+                Dao.getInstance().getModulesConfigs().then(moduleConfigList => {
 
-                    if(moduleListConfigs && moduleListConfigs.moduleList.length > 0) {
-                        self.loadModules(moduleListConfigs);
+                    if(moduleConfigList && moduleConfigList.length > 0) {
+                        self.loadModules(moduleConfigList);
                     }
                     else {
                         console.error('Error with modules configuration!');
@@ -86,8 +90,8 @@ export class Bot {
         }
     }
 
-    private loadModules(modulesConfig: ModulesListConfig) {
-        modulesConfig.moduleList.forEach(moduleConfig => {
+    private loadModules(moduleConfigList: ModuleConfig[]) {
+        moduleConfigList.forEach(moduleConfig => {
             var module = ModuleLoader.loadModule(moduleConfig);
             
             // Load module events
@@ -121,7 +125,7 @@ export class Bot {
             const command = this.commandTable.get(commandName);
             if(command) {
                 const commandContext = new CommandContext(commandName, args, message);
-                if(command.permission === Permission.OWNER && message.member.user.id === process.env.OWNER_ID) {
+                if(command.permission === Permission.OWNER && message.author.id === process.env.OWNER_ID) {
                     command.fn(commandContext);
                 }
                 else if(command.permission === Permission.ADMIN && message.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) {

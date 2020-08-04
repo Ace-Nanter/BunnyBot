@@ -27,7 +27,7 @@ export class AdministrationModule extends BotModule {
     }
 
     private static onGuildMemberAdd(member: GuildMember) {
-        if(member.user.id !== Bot.getClient().user.id) {
+        if(member.user.id !== Bot.getId()) {
             Logger.info(`${member.user.username} joined ${member.guild.name}!`);
             member.guild.roles.fetch(AdministrationModule.newRoleId).then(role => {
                 member.roles.add(role);
