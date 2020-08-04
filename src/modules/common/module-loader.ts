@@ -1,7 +1,7 @@
-import { ModuleConfig } from "../models/config/module-config";
+import { ModuleConfig } from "../../models/config/module-config";
 import { BotModule } from "./bot-module";
-import { Logger } from "../logger/logger";
-import * as ModuleIndex from "../modules/index";
+import { Logger } from "../../logger/logger";
+import * as ModuleIndex from "./index";
 
 export class ModuleLoader {
 
@@ -17,7 +17,7 @@ export class ModuleLoader {
             return module;
         }
         catch(error) {
-            Logger.warn(`Module ${config.moduleName} not found!`);
+            Logger.warn(`Module ${config.moduleName} not found! Error: ${error}`);
             return null;
         }
     }
