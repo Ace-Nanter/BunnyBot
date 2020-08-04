@@ -89,7 +89,7 @@ export class GamesRolesModule extends BotModule {
 
     private static onMessageReactionAdd(messageReaction: MessageReaction, user: User) {
 
-        const clientId = Bot.getClient().user.id;
+        const clientId = Bot.getId();
 
         if(user.id !== clientId && messageReaction.message.id === GamesRolesModule.targetMessageID
             && GamesRolesModule.instance && GamesRolesModule.instance.gamesTable) {
@@ -114,7 +114,7 @@ export class GamesRolesModule extends BotModule {
 
     private static onMessageReactionRemove(messageReaction: MessageReaction, user: User) {
 
-        const clientId = Bot.getClient().user.id;
+        const clientId = Bot.getId();
 
         if(user.id !== clientId && messageReaction.message.id === GamesRolesModule.targetMessageID
             && GamesRolesModule.instance && GamesRolesModule.instance.gamesTable) {
@@ -138,7 +138,7 @@ export class GamesRolesModule extends BotModule {
     }
 
     private static onGuildMemberAdd(member: GuildMember) {
-        if(member.user.id !== Bot.getClient().user.id && GamesRolesModule.instance) {
+        if(member.user.id !== Bot.getId() && GamesRolesModule.instance) {
             GamesRolesModule.instance.scanPlayer(member);
         }
     }
