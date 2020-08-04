@@ -24,7 +24,9 @@ export class MongoDao implements DaoInterface {
             return Promise.reject(e);
         } 
         finally{
-            client.close();
+            if(client) {
+                client.close();
+            }
         }
     }
 

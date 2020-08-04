@@ -1,10 +1,12 @@
 import { ClientEvents } from "discord.js";
+import { Command } from "../../models/command/command.model";
 
 export abstract class BotModule {
     
     constructor(params: any) { }
 
     protected callbacks: Map<keyof ClientEvents, ((...args: ClientEvents[keyof ClientEvents]) => void)>;
+    protected commands: Map<string, Command>;
     
     getEventsCovered() : (keyof ClientEvents)[] {
         return this.callbacks && this.callbacks.size > 0 ? 
@@ -14,5 +16,9 @@ export abstract class BotModule {
 
     getCallback(eventType: (keyof ClientEvents)): ((...args: ClientEvents[keyof ClientEvents]) => void) {
         return this.callbacks.get(eventType);
+    }
+
+    getCommands() : Map<string, Command> {
+        return this.commands;
     }
 }

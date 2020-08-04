@@ -2,14 +2,17 @@ import * as Discord from 'discord.js';
 import { Dao } from './dao/dao';
 import { Logger } from './logger/logger';
 import { ModulesListConfig } from './models/config/module-config';
-import { ModuleLoader } from './modules/module-loader';
+import { ModuleLoader } from './modules/common/module-loader';
+import { Message, MessageMentions } from 'discord.js';
+import { CommandContext } from './models/command/command-context.model';
+import { Command } from './models/command/command.model';
+import { Permission } from './models/command/permission.enum';
 
 export class Bot {
 
     private static Instance : Bot;
     private client: Discord.Client;
-
-    
+    private commandTable: Map<string, Command>;
 
     public static getInstance() {
         if(!Bot.Instance) {
@@ -29,6 +32,7 @@ export class Bot {
 
     private constructor() {
         this.client = new Discord.Client;
+        this.commandTable = new Map();
     }
 
     private async start() {
@@ -60,19 +64,12 @@ export class Bot {
                 });
             }).catch(error => Logger.error(error));
         });
-    
-        /*
-        this.client.on('messageReactionAdd', function(messageReaction: Discord.MessageReaction, user: Discord.User) {
-            if(messageReaction.message.id === '730433338279723098') {
-                console.log("C'est le bon!");
-            }
-            console.log(messageReaction.emoji.identifier);
-            console.log(user);
-        });
 
-        this.client.on('messageReactionRemove', function(messageReaction: Discord.MessageReaction, user: Discord.User) {
-            
-        });*/
+        this.client.on('message', function(message: Message) {
+            if(message.mentions.users.has(self.client.user.id)) {
+                self.executeCommand(message);
+            }
+        })
 
         this.client.on('disconnect', function() {
             Logger.warn("Disconnecting...");
@@ -92,11 +89,48 @@ export class Bot {
     private loadModules(modulesConfig: ModulesListConfig) {
         modulesConfig.moduleList.forEach(moduleConfig => {
             var module = ModuleLoader.loadModule(moduleConfig);
+            
+            // Load module events
             if(module && module.getEventsCovered()) {
                 module.getEventsCovered().forEach(eventType => {
                     this.client.on(eventType, module.getCallback(eventType));
                 });
             }
+
+            // Load module commands
+            if(module && module.getCommands()) {
+                module.getCommands().forEach((value, key) => {
+                    if(!this.commandTable.has(key)) {
+                        this.commandTable.set(key, value);
+                    }
+                });
+            }
         });
+    }
+
+    private executeCommand(message: Message) {
+        if(message.member.user.id !== this.client.user.id) {
+            let tmp = message.content.replace(MessageMentions.USERS_PATTERN, '')
+            .split(' ')
+            .filter(s => (s && s.trim() !== ''));
+            
+            const commandName = (tmp.splice(0,1))[0].toLocaleLowerCase();
+            const args = tmp;
+
+            // Find command
+            const command = this.commandTable.get(commandName);
+            if(command) {
+                const commandContext = new CommandContext(commandName, args, message);
+                if(command.permission === Permission.OWNER && message.member.user.id === process.env.OWNER_ID) {
+                    command.fn(commandContext);
+                }
+                else if(command.permission === Permission.ADMIN && message.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
+                    command.fn(commandContext);
+                }
+                else if(command.permission === Permission.ALL) {
+                    command.fn(commandContext);
+                }
+            }
+        }
     }
 }

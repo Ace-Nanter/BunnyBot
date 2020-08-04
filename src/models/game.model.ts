@@ -3,5 +3,5 @@ export class Game {
     emojiId: string;
     emojiName: string;
     gameName: string;
-    // image: any
+    activityId: string;
 }
