@@ -41,11 +41,11 @@ export class DiscordLogger implements LoggerInterface {
     }
 
     public warn(msg: string) {
+        console.warn(msg);
         const messageEmbed = new MessageEmbed()
                         .setColor("0xFFFF00")
                         .setDescription(msg)
                         .setTitle("Warn")
         this.channel.send(messageEmbed);
-        this.channel.send(msg);
     }
 }

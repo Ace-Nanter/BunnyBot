@@ -1,5 +1,3 @@
-import { MongoDao } from './dao/mongo-dao';
-import { DiscordLogger } from './logger/discord-logger';
 import { Bot } from './bot';
 import { Dao } from './dao/dao';
 

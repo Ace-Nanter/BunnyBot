@@ -5,8 +5,8 @@ import { Logger } from './logger/logger';
 import { CommandContext } from './models/command/command-context.model';
 import { Command } from './models/command/command.model';
 import { Permission } from './models/command/permission.enum';
-import { ModuleLoader } from './modules/common/module-loader';
 import { ModuleConfig } from './models/config/module-config';
+import { ModuleLoader } from './modules/common/module-loader';
 
 export class Bot {
 
@@ -58,19 +58,13 @@ export class Bot {
                     }
                     
                     self.client.user.setStatus('online');
-                    /*self.client.user.setActivity('Being improved!'/*, 
-                    {
-                        type: "WATCHING",
-                        url: 'https://videos.pierreval.ovh'
-                    });*/
-
                     Logger.info("Bot started successfully");
                 });
             }).catch(error => Logger.error(error));
         });
 
         this.client.on('message', function(message: Message) {
-            if(message.mentions.users.has(self.client.user.id)) {
+            if(self.commandTable && message.mentions.users.has(self.client.user.id)) {
                 self.executeCommand(message);
             }
         })
