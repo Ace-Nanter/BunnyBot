@@ -100,7 +100,7 @@ export class GamesRolesModule extends BotModule {
                 messageReaction.message.guild.roles.fetch(game.roleId).then(role => {
                     if(!member.roles.cache.has(game.roleId)) {
                         member.roles.add(role);
-                        Logger.info(`Removed role ${role.name} from ${user.username}`);
+                        Logger.info(`Added role ${role.name} to ${user.username}`);
                         member.createDM().then(channel => {
                             channel.send(`Je t'ai ajouté le rôle **${role.name}**!`);
                         });
