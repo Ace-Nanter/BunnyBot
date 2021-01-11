@@ -35,21 +35,21 @@ export class GamesRolesModule extends BotModule {
     }
     
     private fetchMessage() {
-        Bot.getClient().channels.fetch(GamesRolesModule.targetChannelID).then(c => {
-            const channel = c as TextChannel;
-            this.guild = channel.guild;             // Helps scan process
-            channel.messages.fetch(GamesRolesModule.targetMessageID).then(message => {
-                this.addReaction(message);
-            }).catch(e => Logger.warn(`Games-Roles Module: Unable to find target message! ${e}`));
-        });
+      Bot.getClient().channels.fetch(GamesRolesModule.targetChannelID).then(c => {
+          const channel = c as TextChannel;
+          this.guild = channel.guild;             // Helps scan process
+          channel.messages.fetch(GamesRolesModule.targetMessageID).then(message => {
+              this.addReaction(message);
+          }).catch(e => Logger.warn(`Games-Roles Module: Unable to find target message! ${e}`));
+      });
     }
 
     private scanPlayersActivity() {
-        this.guild.members.fetch().then(members => {
-            members.forEach(member => {
-                this.scanPlayer(member);
-            });
-        });
+      this.guild.members.fetch().then(members => {
+          members.forEach(member => {
+              this.scanPlayer(member);
+          });
+      });
     }
 
     private scanPlayer(member: GuildMember) {
