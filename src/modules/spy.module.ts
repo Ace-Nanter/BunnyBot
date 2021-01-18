@@ -27,17 +27,16 @@ export class SpyModule extends BotModule {
     if(message.author.id !== Bot.getId()) {
       if(message.guild === SpyModule.spiedGuild) {
         const targetChannel = SpyModule.targetGuild.channels.cache.find(c => c.name === originChannel.name) as TextChannel;
-        let msgTmp = message;
-        msgTmp.content = message.author.username + ' : ' + message.content;
+        const content = message.author.username + ' : ' + message.content;
 
         // Create channel if it doesn't exist
         if(!targetChannel) {
           SpyModule.targetGuild.channels.create(originChannel.name, { type: 'text' }).then(textChannel => {
-            textChannel.send(msgTmp);
+            textChannel.send(content);
           });
         }
         else {
-          targetChannel.send(msgTmp);
+          targetChannel.send(content);
         }
       }
       // Reply
@@ -45,7 +44,7 @@ export class SpyModule extends BotModule {
         const targetChannel = SpyModule.spiedGuild.channels.cache.find(c => c.name === originChannel.name) as TextChannel;
         
         if(targetChannel) {
-          targetChannel.send(message);
+          targetChannel.send(message.content);
         }
       }
     }

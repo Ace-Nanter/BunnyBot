@@ -1,40 +1,42 @@
-import { textChangeRangeIsUnchanged } from "typescript";
-import { Bot } from "../../../bot";
-import { PlayerColor, PlayerUpdate } from "./player-update.model";
+import { PlayerAction, PlayerColor, PlayerUpdate } from "./player-update.model";
 
 export class Player {
-  id: string;       // Discord ID
   name: string;     // Among Us name
+  index: number;    // Index for associating player with a reaction in Discord
   dead: boolean;
-  disconnected: boolean;
   color: PlayerColor;
 
-  constructor(playerUpdate: PlayerUpdate) {
-    this.id = null;
+  /**
+   * Default constructor
+   * @param playerUpdate PlayerUpdate used to build the Player object 
+   * @param index Index of the player
+   */
+  constructor(playerUpdate: PlayerUpdate, index: number) {
+    this.index = index;
     this.name = playerUpdate.name;
-    this.dead = playerUpdate.isDead;
     this.color = playerUpdate.color;
   }
 
   public update(playerUpdate: PlayerUpdate) {
-    this.dead = playerUpdate.isDead;
-    this.color = playerUpdate.color;
+    switch(playerUpdate.action) {
+      case PlayerAction.Died:
+      case PlayerAction.Exiled:
+      case PlayerAction.Disconnected:
+        this.dead = true;
+        break;
+      case PlayerAction.Joined:
+        this.dead = false;
+        break;
+      case PlayerAction.ChangedColor:
+        this.color = playerUpdate.color;
+        break;
+    }
   }
 
-  public setDead(dead: boolean) {
-    this.dead = dead;
-  }
-
-  public setDiscordId(id: string) {
-    this.id = id;
+  /**
+   * Reset a player status
+   */
+  public reset(): void {
+    this.dead = false;
   }
 }
-
-/*
-
-const msg = await channel.messages.fetch(MessageID);
-
-msg.reactions.resolve("REACTION EMOJI, 
-REACTION OBJECT OR REACTION ID").users.remove("ID OR OBJECT OF USER TO REMOVE");
-
-*/

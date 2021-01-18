@@ -15,7 +15,7 @@ export class Dao {
                     Dao.instance = new MongoDao(args[0], args[1]);
                 }
                 else {
-                    Logger.error('Not enough arguments for for instanciating a MongoDao!');
+                    Logger.error('Not enough arguments for instantiating a MongoDao!');
                 }
             break;
         }
@@ -23,8 +23,5 @@ export class Dao {
 
     public static getInstance() : DaoInterface {
         return Dao.instance;
-    }
-
-
-    
+    }   
 }

@@ -1,4 +1,3 @@
-import { TextChannel, MessageEmbed } from "discord.js";
 import { DiscordLogger } from "./discord-logger";
 
 export class Logger {

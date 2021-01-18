@@ -1,5 +1,5 @@
+import { TextChannel } from "discord.js";
 import { CommandContext } from "../../models/command/command-context.model";
-import { Message, DMChannel, TextChannel } from "discord.js";
 
 export function clear(commandContext: CommandContext) {
     if(commandContext.args && commandContext.args.length === 1 && commandContext.message) {

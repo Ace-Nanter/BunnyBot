@@ -14,7 +14,7 @@ export class Bot {
     private client: Discord.Client;
     private commandTable: Map<string, Command>;
 
-    public static getInstance() {
+    public static getInstance(): Bot {
         if(!Bot.Instance) {
             Bot.Instance = new Bot();
         }
@@ -22,7 +22,7 @@ export class Bot {
         return Bot.Instance;
     }
 
-    public static getClient() {
+    public static getClient(): Discord.Client {
         return Bot.getInstance().client;
     }
     
