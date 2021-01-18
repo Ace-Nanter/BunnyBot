@@ -37,7 +37,7 @@ export class ServerService {
   }
 
   private static initializeRoutes(router: express.Router) {
-    
+        
     router.put('/game-state', (request: express.Request, response: express.Response) => {
       ServerService.eventEmitter.emit('onGameStateChanged', request.body.NewState);
       response.status(200).send();
@@ -47,10 +47,10 @@ export class ServerService {
       ServerService.eventEmitter.emit('onPlayerChanged', new PlayerUpdate(request.body));
       response.status(200).send();
     });
-  }
 
-  public reset(): void {
-
+    router.post('/reset', (request: express.Request, response: express.Response) => {
+      ServerService.eventEmitter.emit('onReset', null);
+      response.status(200).send();
+    });
   }
-  // TODO : rename into AmongUs instance manager
 }
