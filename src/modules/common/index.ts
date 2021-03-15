@@ -3,3 +3,4 @@ export { AdministrationModule as AdministrationModule } from '../administration/
 export { GamesRolesModule as GamesRolesModule } from '../games-roles.module';
 export { NewRoleModule as NewRoleModule } from '../new-role.module';
 export { SpyModule as SpyModule } from '../spy.module';
+export { AmongUsModule as AmongUsModule } from '../among-us/among-us.module';

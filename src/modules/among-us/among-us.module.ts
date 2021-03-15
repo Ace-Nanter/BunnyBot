@@ -1,9 +1,10 @@
-import { Command } from './../../models/command/command.model';
-import { Permission } from './../../models/command/permission.enum';
+import { Command } from '../../models/command/command.model';
+import { Permission } from '../../models/command/permission.enum';
 import { VoiceChannel, VoiceState } from "discord.js";
 import { BotModule } from "../common/bot-module";
+import { InstanceService } from './services/instance.service';
 
-export class MuteSubscriberModule extends BotModule {
+export class AmongUsModule extends BotModule {
 
   private targetChannel: VoiceChannel;
   private targetUserID: string;
@@ -12,7 +13,7 @@ export class MuteSubscriberModule extends BotModule {
     super(params);
 
     this.callbacks = new Map();
-    this.callbacks.set('voiceStateUpdate', this.onGuildMemberSpeaking);
+    this.callbacks.set('voiceStateUpdate', this.onVoiceStateUpdate);
 
     this.commands = new Map();
     this.commands.set('mute-subscribe', new Command('mute-subscribe', Permission.OWNER, null));
@@ -23,7 +24,10 @@ export class MuteSubscriberModule extends BotModule {
     }
   }
 
-  private onGuildMemberSpeaking(oldState: VoiceState, newState: VoiceState) {
+  private onVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
+
+    // TODO : add parsing for join / leave
+
     if (oldState.member.id === this.targetUserID) {
       if (oldState.selfMute === false && newState.selfMute === true) {
         this.changeEveryoneMuteStatus(true);
@@ -36,7 +40,7 @@ export class MuteSubscriberModule extends BotModule {
 
   private init(params: any[]) {
     const targetChannelID = params['targetChannel'] ? params['targetChannel'] : null;
-    
+    InstanceService.getInstance().start(6000);
 
     // TODO : create webserver
   }

@@ -8,9 +8,13 @@
     "npm": "6.x"
   },
   "dependencies": {
+    "@types/express": "^4.17.11",
     "@types/node": "^14.0.19",
+    "@types/socket.io": "^2.1.12",
     "discord.js": "^12.2.0",
+    "express": "^4.17.1",
     "mongodb": "^3.5.9",
+    "socket.io": "^3.0.5",
     "typescript": "^3.9.6"
   },
   "scripts": {
