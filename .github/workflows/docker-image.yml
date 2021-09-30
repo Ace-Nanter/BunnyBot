@@ -10,8 +10,9 @@ on:
     tags:
       - v*
 
-  # Run tests for any PRs.
   pull_request:
+    branches:
+      - master
 
 jobs:
   checkAndBuild:
@@ -45,6 +46,7 @@ jobs:
   dockerize:
     runs-on: ubuntu-latest
     needs: checkAndBuild
+    if: github.event_name != 'pull_request'
     env:
       IMAGE_NAME: bunny-bot
       DOCKER_TARGET_PLATFORM: linux/arm64
