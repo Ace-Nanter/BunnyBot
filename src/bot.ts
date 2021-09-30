@@ -1,134 +1,170 @@
-import * as Discord from 'discord.js';
-import { Message, MessageMentions } from 'discord.js';
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v9';
+import { Client, Intents, Snowflake } from 'discord.js';
+import { exit } from 'process';
 import { Dao } from './dao/dao';
 import { Logger } from './logger/logger';
-import { CommandContext } from './models/command/command-context.model';
-import { Command } from './models/command/command.model';
-import { Permission } from './models/command/permission.enum';
-import { ModuleConfig } from './models/config/module-config';
-import { ModuleLoader } from './modules/common/module-loader';
+import { Command } from './models/modules/command.model';
+import { ModuleConfig } from './models/modules/module-config';
+import { ModuleLoader } from './modules/module-loader';
+
 
 export class Bot {
 
-    private static Instance : Bot;
-    private client: Discord.Client;
-    private commandTable: Map<string, Command>;
+  private static Instance: Bot;
+  private client: Client;
+  private commands: Map<string, Command>;
+  private readonly restClient: REST;
 
-    public static getInstance() {
-        if(!Bot.Instance) {
-            Bot.Instance = new Bot();
-        }
-
-        return Bot.Instance;
+  public static getInstance() {
+    if (!Bot.Instance) {
+      Bot.Instance = new Bot();
     }
 
-    public static getClient() {
-        return Bot.getInstance().client;
+    return Bot.Instance;
+  }
+
+  public static getClient() {
+    return Bot.getInstance().client;
+  }
+
+  public static getId(): Snowflake {
+    return Bot.getInstance().client.user.id;
+  }
+
+  public static start() {
+    return Bot.getInstance().start();
+  }
+
+  private constructor() {
+    this.client = new Client({ intents: [
+      Intents.FLAGS.GUILDS,
+      Intents.FLAGS.GUILD_MEMBERS,
+      Intents.FLAGS.GUILD_BANS,
+      Intents.FLAGS.GUILD_VOICE_STATES,
+      Intents.FLAGS.GUILD_MESSAGES,
+      Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+      Intents.FLAGS.GUILD_PRESENCES,
+      Intents.FLAGS.GUILD_INVITES,
+      Intents.FLAGS.DIRECT_MESSAGES,
+      Intents.FLAGS.DIRECT_MESSAGE_REACTIONS
+    ]});
+
+    this.commands = new Map<string, Command>();
+    this.restClient = new REST({ version: '9' }).setToken(process.env.TOKEN);
+  }
+
+  private async start(): Promise<void> {
+
+    this.client.login(process.env.TOKEN);
+
+    this.client.once('ready', () => {
+
+      // Launch Logger
+      this.initLogger().then(() => {
+
+        // Retrieve modules
+        Dao.getInstance().getModulesConfigs().then(moduleConfigList => {
+
+          if (moduleConfigList && moduleConfigList.length > 0) {
+            this.loadModules(moduleConfigList);
+          }
+          else {
+            Logger.error('Error with modules configuration!');
+          }
+
+          this.client.user.setStatus('online');
+          Logger.info("Bot started successfully");
+        });
+
+
+      }).catch((error) => {
+        Logger.error(error);
+        this.disconnect();
+      });
+    });
+
+    this.client.on('interactionCreate', async (interaction) => {
+      if(!interaction.isCommand()) return ;
+
+      const command: Command = this.commands.get(interaction.commandName);
+      if(!command) {
+        console.warn(`Error: command ${interaction.commandName} not found!`);
+        return ;
+      }
+
+      command.execution(interaction);
+    })
+
+    this.client.on('disconnect', function () {
+      Logger.warn("Disconnecting...");
+      this.dao.closeConnection();
+    });
+  }
+
+  private async initLogger() {
+    if (process.env.LOG_CHANNEL_ID) {
+      const channel = await this.client.channels.fetch(process.env.LOG_CHANNEL_ID);
+      if (channel && channel.type === 'GUILD_TEXT') {
+        Logger.setLoggerType(LoggerType.DiscordLogger, channel);
+      }
+    }
+  }
+
+  private loadModules(moduleConfigList: ModuleConfig[]) {
+    moduleConfigList.forEach(moduleConfig => {
+      var module = ModuleLoader.loadModule(moduleConfig);
+
+      // Load module events
+      if (module && module.getEventsCovered()) {
+        module.getEventsCovered().forEach(eventType => {
+          this.client.on(eventType, module.getCallback(eventType));
+        });
+      }
+
+      // Load module commands
+      if (module && module.getCommands()) {
+        module.getCommands().forEach((command: Command, name: string) => {
+          if (!this.commands.has(name)) {
+            this.commands.set(name, command);
+          }
+        });
+      }
+    });
+
+    this.declareCommands();
+  }
+
+  private async declareCommands(): Promise<void> {
+
+    const commands = Array.from(this.commands.values()).map(command => { return command.slashCommand.toJSON(); })
+
+    try {
+      await this.restClient.put(
+        Routes.applicationCommands(process.env.BOT_ID),
+        { body: commands }
+      );
+    } catch(error) {
+      Logger.error(error);
+      this.disconnect();
     }
     
-    public static getId(): Discord.Snowflake{
-        return Bot.getInstance().client.user.id;
-    }
+    (await this.client.application?.commands.fetch()).forEach(async (applicationCommand, id: Snowflake) => {
+      const command = this.commands.get(applicationCommand.name);
 
-    public static start() {
-        return Bot.getInstance().start();
-    }
-
-    private constructor() {
-        this.client = new Discord.Client;
-        this.commandTable = new Map();
-    }
-
-    private async start() {
-
-        const self = this;
-
-        this.client.login(process.env.TOKEN);
-        this.client.on('ready', function() {
-
-            // Launch Logger
-            self.initLogger().then(() => {
-                Dao.getInstance().getModulesConfigs().then(moduleConfigList => {
-
-                    if(moduleConfigList && moduleConfigList.length > 0) {
-                        self.loadModules(moduleConfigList);
-                    }
-                    else {
-                        console.error('Error with modules configuration!');
-                    }
-                    
-                    self.client.user.setStatus('online');
-                    Logger.info("Bot started successfully");
-                });
-            }).catch(error => Logger.error(error));
+      if(command) {
+        const permissionsPerGuild = await Command.buildPermissionsPerGuild(command);
+        permissionsPerGuild.forEach((permissions, guildId) => {
+          this.client.application?.commands.permissions.set({  command: id, guild: guildId, permissions: permissions });
         });
-
-        this.client.on('message', function(message: Message) {
-            if(self.commandTable && message.mentions.users.has(self.client.user.id)) {
-                self.executeCommand(message);
-            }
-        })
-
-        this.client.on('disconnect', function() {
-            Logger.warn("Disconnecting...");
-            this.dao.closeConnection();
-        });
-    }
-
-    private async initLogger() {
-        if(process.env.LOG_CHANNEL_ID) {
-            const channel = await this.client.channels.fetch(process.env.LOG_CHANNEL_ID);
-            if(channel && channel.type === 'text') {
-                Logger.setLoggerType(LoggerType.DiscordLogger, channel);
-            }
-        }
-    }
-
-    private loadModules(moduleConfigList: ModuleConfig[]) {
-        moduleConfigList.forEach(moduleConfig => {
-            var module = ModuleLoader.loadModule(moduleConfig);
-            
-            // Load module events
-            if(module && module.getEventsCovered()) {
-                module.getEventsCovered().forEach(eventType => {
-                    this.client.on(eventType, module.getCallback(eventType));
-                });
-            }
-
-            // Load module commands
-            if(module && module.getCommands()) {
-                module.getCommands().forEach((value, key) => {
-                    if(!this.commandTable.has(key)) {
-                        this.commandTable.set(key, value);
-                    }
-                });
-            }
-        });
-    }
-
-    private executeCommand(message: Message) {
-        if(message.member.user.id !== this.client.user.id) {
-            let tmp = message.content.replace(MessageMentions.USERS_PATTERN, '')
-            .split(' ')
-            .filter(s => (s && s.trim() !== ''));
-            
-            const commandName = (tmp.splice(0,1))[0].toLocaleLowerCase();
-            const args = tmp;
-
-            // Find command
-            const command = this.commandTable.get(commandName);
-            if(command) {
-                const commandContext = new CommandContext(commandName, args, message);
-                if(command.permission === Permission.OWNER && message.author.id === process.env.OWNER_ID) {
-                    command.fn(commandContext);
-                }
-                else if(command.permission === Permission.ADMIN && message.member.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
-                    command.fn(commandContext);
-                }
-                else if(command.permission === Permission.ALL) {
-                    command.fn(commandContext);
-                }
-            }
-        }
-    }
+      }
+    });    
+  }
+  /**
+   * Disconnect client and shut application
+   */
+  private disconnect(): void {
+    this.client.destroy();
+    exit(0);
+  }
 }

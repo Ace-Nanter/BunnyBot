@@ -1,6 +1,6 @@
-import { BotModule } from "./common/bot-module";
-import { Message, Guild, GuildMember, TextChannel } from "discord.js";
+import { Guild, Message, TextChannel } from "discord.js";
 import { Bot } from "../bot";
+import { BotModule } from "../models/modules/bot-module.model";
 
 export class SpyModule extends BotModule {
 
@@ -16,7 +16,7 @@ export class SpyModule extends BotModule {
     }
 
     this.callbacks = new Map();
-    this.callbacks.set('message', SpyModule.onMessageReceived)
+    this.callbacks.set('messageCreate', SpyModule.onMessageReceived)
   }
 
   private static onMessageReceived(message: Message) {
@@ -27,12 +27,11 @@ export class SpyModule extends BotModule {
     if(message.author.id !== Bot.getId()) {
       if(message.guild === SpyModule.spiedGuild) {
         const targetChannel = SpyModule.targetGuild.channels.cache.find(c => c.name === originChannel.name) as TextChannel;
-        let msgTmp = message;
-        msgTmp.content = message.author.username + ' : ' + message.content;
+        let msgTmp: string = `${message.author.username} : ${message.content}`;
 
         // Create channel if it doesn't exist
         if(!targetChannel) {
-          SpyModule.targetGuild.channels.create(originChannel.name, { type: 'text' }).then(textChannel => {
+          SpyModule.targetGuild.channels.create(originChannel.name, { type: 'GUILD_TEXT' }).then(textChannel => {
             textChannel.send(msgTmp);
           });
         }
@@ -45,7 +44,7 @@ export class SpyModule extends BotModule {
         const targetChannel = SpyModule.spiedGuild.channels.cache.find(c => c.name === originChannel.name) as TextChannel;
         
         if(targetChannel) {
-          targetChannel.send(message);
+          targetChannel.send(message.content);
         }
       }
     }

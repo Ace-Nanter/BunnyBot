@@ -1,12 +1,40 @@
-import { CommandContext } from "../../models/command/command-context.model";
-import { Message, DMChannel, TextChannel } from "discord.js";
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction, TextChannel } from 'discord.js';
+import { Logger } from '../../logger/logger';
+import { CommandPermission } from '../../models/modules/command-permission.enum';
+import { Command } from '../../models/modules/command.model';
 
-export function clear(commandContext: CommandContext) {
-    if(commandContext.args && commandContext.args.length === 1 && commandContext.message) {
-        const nb = parseInt(commandContext.args[0]); 
-        if(nb && nb > 0 && commandContext.message.channel instanceof TextChannel) {
-            const channel: TextChannel = commandContext.message.channel as TextChannel;
-            channel.bulkDelete(nb + 1);
-        }
+export const clearCommand = new Command (
+
+  new SlashCommandBuilder().setName('clear')
+  .setDescription('Clear messages')
+  .addNumberOption(option => 
+    option
+    .setName('count')
+    .setDescription('Number of messages which should be deleted')
+    .setRequired(true)
+  )
+  .setDefaultPermission(false),
+  [ CommandPermission.OWNER, CommandPermission.GUILD_OWNER, CommandPermission.ADMIN ],
+  async (interaction: CommandInteraction) => {
+    const count = interaction.options.getNumber('count');
+    
+    if(count < 1 || count > 99) {
+      interaction.reply({ content: 'You need to input a number between 1 and 99.' });
+      setTimeout(() => { interaction.deleteReply(); }, 10000);
+      return ;
     }
-}
+
+    await (interaction.channel as TextChannel).bulkDelete(count, true)
+    .then(() => {
+      interaction.reply({ content: `Successfully deleted \`${count}\` messages.` });
+      setTimeout(() => { interaction.deleteReply(); }, 10000);
+    })
+    .catch(error => {
+			Logger.error(error);
+			interaction.reply({ content: 'There was an error trying to prune messages in this channel!' });
+      setTimeout(() => { interaction.deleteReply(); }, 10000);
+		});
+  }
+)
+  
