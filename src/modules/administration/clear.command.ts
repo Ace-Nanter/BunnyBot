@@ -8,7 +8,7 @@ export const clearCommand = new Command (
 
   new SlashCommandBuilder().setName('clear')
   .setDescription('Clear messages')
-  .addNumberOption(option => 
+  .addIntegerOption(option => 
     option
     .setName('count')
     .setDescription('Number of messages which should be deleted')
