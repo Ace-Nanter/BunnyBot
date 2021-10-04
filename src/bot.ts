@@ -140,6 +140,7 @@ export class Bot {
     const commands = Array.from(this.commands.values()).map(command => { return command.slashCommand.toJSON(); })
 
     try {
+      (await this.client.application?.commands.fetch()).forEach(async (applicationCommand) => applicationCommand.delete());
       await this.restClient.put(
         Routes.applicationCommands(process.env.BOT_ID),
         { body: commands }
@@ -160,6 +161,7 @@ export class Bot {
       }
     });    
   }
+  
   /**
    * Disconnect client and shut application
    */

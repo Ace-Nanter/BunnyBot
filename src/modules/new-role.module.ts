@@ -1,4 +1,4 @@
-import { GuildMember, MessageReaction, Role, Message, Guild, TextChannel, User } from "discord.js";
+import { GuildMember, MessageReaction, Role, Message, Guild, TextChannel, User, Snowflake } from "discord.js";
 import { Bot } from "../bot";
 import { Logger } from "../logger/logger";
 import { BotModule } from "../models/modules/bot-module.model";
@@ -11,6 +11,7 @@ const MESSAGE_ID = 'messageId';
 
 export class NewRoleModule extends BotModule {
 
+  private static guildId: Snowflake;
   private static role: Role;
   private static message: Message;
   private static reactionName: string;
@@ -37,6 +38,8 @@ export class NewRoleModule extends BotModule {
       if (params[GUILD_ID] && params[ROLE_ID]) {
         guild = Bot.getClient().guilds.resolve(params[GUILD_ID])
         role = await guild.roles.fetch(params[ROLE_ID]);
+
+        NewRoleModule.guildId = guild.id;
       }
 
       // Get message
@@ -68,7 +71,7 @@ export class NewRoleModule extends BotModule {
   }
 
   private static onGuildMemberAdd(member: GuildMember) {
-    if (member.user.id !== Bot.getId()) {
+    if (member.guild.id === NewRoleModule.guildId && member.user.id !== Bot.getId()) {
       Logger.info(`${member.user.username} joined ${member.guild.name}!`);
       if (NewRoleModule.role) {
         member.roles.add(NewRoleModule.role);
