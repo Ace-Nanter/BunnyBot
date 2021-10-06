@@ -21,19 +21,18 @@ export class Command {
       const userIds: Set<Snowflake> = new Set();
 
       for await (const permission of command.permissions) {
-
-        let snowflakes = await Command.findUsers(permission, guild);
+        const snowflakes = await Command.findUsers(permission, guild);
   
         for(const snowflake of snowflakes) {
           userIds.add(snowflake);
         }
-      };
+      }
 
       const permissions: ApplicationCommandPermissionData[] = Array.from(userIds.values()).map(userId => {
         return { id: userId, type: 'USER', permission: true };
       });
       permissionsPerGuild.set(guild.id, permissions);      
-    };
+    }
 
     return permissionsPerGuild;
   }

@@ -19,7 +19,7 @@ export class GamesRolesModule extends BotModule {
   private static instance: GamesRolesModule;
 
   constructor(params: any) {
-    super(params);
+    super();
 
     this.callbacks = new Map();
     this.callbacks.set('messageReactionAdd', GamesRolesModule.onMessageReactionAdd);
