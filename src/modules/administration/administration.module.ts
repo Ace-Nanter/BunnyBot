@@ -1,4 +1,5 @@
-import { GuildChannel, GuildMember, Snowflake, TextChannel } from 'discord.js';
+import { ActivityOptions, GuildChannel, GuildMember, Snowflake, TextChannel } from 'discord.js';
+import { Bot } from '../../bot';
 import { Logger } from '../../logger/logger';
 import { BotModule } from "../../models/modules/bot-module.model";
 import { clearCommand } from "./clear.command";
@@ -25,11 +26,30 @@ export class AdministrationModule extends BotModule {
     this.commands.set(clearCommand.slashCommand.name, clearCommand);
   }
 
-  private init(params: any[]) {
+  private init(params: any[]): void {
     this.initLeaveMessageParams(params);
+    this.initActivity(params);
   }
 
-  private initLeaveMessageParams(params: any[]) {
+  /**
+   * Initializes bot activity
+   * 
+   * @param params Parameters containing activity to set
+   */
+  private initActivity(params: any[]): void {
+    const activityParam: { activity: string, options: ActivityOptions } = params['activity'];
+
+    if(activityParam && activityParam.activity) {
+      Bot.getClient().user.setActivity(activityParam.activity, activityParam.options);
+    }
+  }
+
+  /**
+   * Initializes parameters for leave messages
+   * 
+   * @param params Parameters to initialize
+   */
+  private initLeaveMessageParams(params: any[]): void {
     const leaveParams: any[] = params['leaveMessage'];
 
     if (!leaveParams || leaveParams.length <= 0) {

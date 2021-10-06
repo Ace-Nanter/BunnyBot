@@ -3,6 +3,7 @@ import { Logger } from '../logger/logger';
 import { ModuleConfig } from '../models/modules/module-config';
 import { Game } from '../models/game.model';
 import { DaoInterface } from './dao.interface';
+import { ActivityOptions } from 'discord.js';
 
 export class MongoDao implements DaoInterface {
 
@@ -40,5 +41,14 @@ export class MongoDao implements DaoInterface {
     return this.operate(function (db): Promise<Game[]> {
       return db.collection('games').find().toArray();
     });
+  }
+
+  public saveActivity(activity: string, activityOptions: ActivityOptions): Promise<void> {
+    return this.operate(function (db): Promise<void> {
+      return db.collection('modules').updateOne(
+        { "moduleName": "AdministrationModule" },   // Criteria to find the right module
+        { $set: { "params.activity.activity": activity, "params.activity.options": activityOptions } }
+      );
+    })
   }
 }
