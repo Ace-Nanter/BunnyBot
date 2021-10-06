@@ -73,7 +73,6 @@ export class Bot {
             Logger.error('Error with modules configuration!');
           }
 
-          this.client.user.setStatus('online');
           Logger.info("Bot started successfully");
         });
 
@@ -140,11 +139,8 @@ export class Bot {
     const commands = Array.from(this.commands.values()).map(command => { return command.slashCommand.toJSON(); })
 
     try {
-      (await this.client.application?.commands.fetch()).forEach(async (applicationCommand) => applicationCommand.delete());
-      await this.restClient.put(
-        Routes.applicationCommands(process.env.BOT_ID),
-        { body: commands }
-      );
+      // Recreate commands
+      await this.restClient.put(Routes.applicationCommands(process.env.BOT_ID), { body: commands });
     } catch(error) {
       Logger.error(error);
       this.disconnect();
@@ -159,9 +155,9 @@ export class Bot {
           this.client.application?.commands.permissions.set({  command: id, guild: guildId, permissions: permissions });
         });
       }
-    });    
+    });
   }
-  
+
   /**
    * Disconnect client and shut application
    */

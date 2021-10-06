@@ -17,7 +17,7 @@ export const clearCommand = new Command (
   .setDefaultPermission(false),
   [ CommandPermission.OWNER, CommandPermission.GUILD_OWNER, CommandPermission.ADMIN ],
   async (interaction: CommandInteraction) => {
-    const count = interaction.options.getNumber('count');
+    const count = interaction.options.getInteger('count');
     
     if(count < 1 || count > 99) {
       interaction.reply({ content: 'You need to input a number between 1 and 99.' });
