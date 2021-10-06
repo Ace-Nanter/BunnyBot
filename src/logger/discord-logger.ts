@@ -1,10 +1,10 @@
-import { TextChannel, MessageEmbed } from 'discord.js';
+import { TextChannel, MessageEmbed, Channel } from 'discord.js';
 
 export class DiscordLogger implements LoggerInterface {
 
   private channel: TextChannel;
 
-  public constructor(channel: any) {
+  public constructor(channel: Channel) {
     if (channel && channel instanceof TextChannel) {
       this.channel = channel as TextChannel;
     }
@@ -13,7 +13,7 @@ export class DiscordLogger implements LoggerInterface {
     }
   }
 
-  public log(msg: string) {
+  public log(msg: string): void {
     console.log(msg);
     const messageEmbed = new MessageEmbed()
       .setColor('#FFFFFF')
@@ -22,7 +22,7 @@ export class DiscordLogger implements LoggerInterface {
     this.channel.send({ embeds: [messageEmbed] });
   }
 
-  public info(msg: string) {
+  public info(msg: string): void {
     console.info(msg);
     const messageEmbed = new MessageEmbed()
       .setColor('#0000FF')
@@ -31,7 +31,7 @@ export class DiscordLogger implements LoggerInterface {
     this.channel.send({ embeds: [messageEmbed] });
   }
 
-  public error(msg: string) {
+  public error(msg: string): void {
     console.error(msg);
     const messageEmbed = new MessageEmbed()
       .setColor('#FF0000')
@@ -40,7 +40,7 @@ export class DiscordLogger implements LoggerInterface {
     this.channel.send({ embeds: [messageEmbed] });
   }
 
-  public warn(msg: string) {
+  public warn(msg: string): void {
     console.warn(msg);
     const messageEmbed = new MessageEmbed()
       .setColor('#FFFF00')

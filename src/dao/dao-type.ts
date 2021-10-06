@@ -1,5 +1,5 @@
-const enum DaoType {
-    Mongo,
-    Postgresql,
-    MySql
+export enum DaoType {
+  Mongo,
+  Postgresql,
+  MySql
 }

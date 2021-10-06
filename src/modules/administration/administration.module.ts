@@ -11,7 +11,7 @@ export class AdministrationModule extends BotModule {
   private static leaveMessageByGuild: Map<Snowflake, LeaveParam>;
 
   constructor(params: any) {
-    super(params);
+    super();
 
     if (params) {
       this.init(params);

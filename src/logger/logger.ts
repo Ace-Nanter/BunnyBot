@@ -1,5 +1,5 @@
-import { TextChannel, MessageEmbed } from "discord.js";
 import { DiscordLogger } from "./discord-logger";
+import { LoggerType } from "./logger-type";
 
 export class Logger {
 
@@ -7,7 +7,7 @@ export class Logger {
 
   private constructor() { }
 
-  public static setLoggerType(type: LoggerType, ...args: any[]) {
+  public static setLoggerType(type: LoggerType, ...args: any[]): void {
     switch (type) {
       case LoggerType.DiscordLogger:
         if (args && args.length === 1 && args[0]) {
@@ -20,7 +20,7 @@ export class Logger {
     }
   }
 
-  public static log(msg: string) {
+  public static log(msg: string): void {
     if (Logger.instance) {
       Logger.instance.log(msg);
     }
@@ -29,7 +29,7 @@ export class Logger {
     }
   }
 
-  public static info(msg: string) {
+  public static info(msg: string): void {
     if (Logger.instance) {
       Logger.instance.info(msg);
     }
@@ -38,7 +38,7 @@ export class Logger {
     }
   }
 
-  public static error(msg: string) {
+  public static error(msg: string): void {
     if (Logger.instance) {
       Logger.instance.error(msg);
     }
@@ -47,7 +47,7 @@ export class Logger {
     }
   }
 
-  public static warn(msg: string) {
+  public static warn(msg: string): void {
     if (Logger.instance) {
       Logger.instance.warn(msg);
     }

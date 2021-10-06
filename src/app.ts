@@ -1,6 +1,7 @@
 import { exit } from 'process';
 import { Bot } from './bot';
 import { Dao } from './dao/dao';
+import { DaoType } from './dao/dao-type';
 
 checkEnvironmentVariables();
 Dao.initDao(DaoType.Mongo, process.env.DATABASE_URI, process.env.DATABASE_NAME);

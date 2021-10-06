@@ -17,7 +17,7 @@ export class NewRoleModule extends BotModule {
   private static reactionName: string;
 
   constructor(params: any) {
-    super(params);
+    super();
 
     this.init(params);
 
