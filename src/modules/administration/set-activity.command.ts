@@ -5,10 +5,14 @@ import { Dao } from '../../dao/dao';
 import { CommandPermission } from '../../models/modules/command-permission.enum';
 import { Command } from '../../models/modules/command.model';
 
-export const setActivityCommand = new Command (
+export default class SetActivityCommand extends Command {
+  name = 'set-activity';
+  description = 'Define bot status';
 
-  new SlashCommandBuilder().setName('set-activity')
-  .setDescription('Define bot status')
+  permissions = [ CommandPermission.OWNER, CommandPermission.GUILD_OWNER ];
+  
+  slashCommand = new SlashCommandBuilder().setName(this.name)
+  .setDescription(this.description)
   .addStringOption(option => 
     option.setName('activity')
     .setDescription('Activity which should be set')
@@ -25,9 +29,9 @@ export const setActivityCommand = new Command (
     .setDescription('URL if type is STREAMING or LISTENING')
     .setRequired(false)
   )
-  .setDefaultPermission(false),
-  [ CommandPermission.OWNER, CommandPermission.GUILD_OWNER ],
-  (interaction: CommandInteraction) => {
+  .setDefaultPermission(false);
+
+  execution = async (interaction: CommandInteraction): Promise<void> => {
     const activity = interaction.options.getString('activity');
     const activityOptions = {
       type: interaction.options.getInteger('type'),
@@ -39,4 +43,4 @@ export const setActivityCommand = new Command (
     interaction.reply({ content: 'Activity set!' });
     setTimeout(() => { interaction.deleteReply(); }, 10000);
   }
-)
+}

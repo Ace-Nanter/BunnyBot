@@ -124,9 +124,11 @@ export class Bot {
 
       // Load module commands
       if (module && module.getCommands()) {
-        module.getCommands().forEach((command: Command, name: string) => {
-          if (!this.commands.has(name)) {
-            this.commands.set(name, command);
+        module.getCommands().forEach((command: Command) => {
+          if (!this.commands.has(command.name)) {
+            this.commands.set(command.name, command);
+          } else {
+            Logger.error(`Error: there are two commands with the same name: ${command.name}`);
           }
         });
       }
@@ -151,7 +153,7 @@ export class Bot {
       const command = this.commands.get(applicationCommand.name);
 
       if(command) {
-        const permissionsPerGuild = await Command.buildPermissionsPerGuild(command);
+        const permissionsPerGuild = await command.buildPermissionsPerGuild();
         permissionsPerGuild.forEach((permissions, guildId) => {
           this.client.application?.commands.permissions.set({  command: id, guild: guildId, permissions: permissions });
         });
