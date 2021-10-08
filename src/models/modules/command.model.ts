@@ -7,7 +7,8 @@ import { CommandPermission } from './command-permission.enum';
 
 export abstract class Command {
 
-  module: BotModule;
+  protected module: BotModule;
+
   abstract name: string;
   abstract description: string;
   abstract slashCommand: SlashCommandBuilder;
@@ -53,7 +54,7 @@ export abstract class Command {
       case (CommandPermission.ADMIN):
         return GuildHelper.findAdmins(guild);
       case (CommandPermission.EVERYONE || CommandPermission.MODERATOR):
-        return Promise.resolve([]);
+        return Promise.resolve([process.env.OWNER_ID]);
     }
   }
 }
