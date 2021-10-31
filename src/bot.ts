@@ -1,6 +1,6 @@
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import { Client, Intents, Snowflake } from 'discord.js';
+import { ButtonInteraction, Client, CommandInteraction, Intents, Snowflake } from 'discord.js';
 import { exit } from 'process';
 import { Dao } from './dao/dao';
 import { Logger } from './logger/logger';
@@ -15,6 +15,7 @@ export class Bot {
   private static Instance: Bot;
   private client: Client;
   private commands: Map<string, Command>;
+  private buttons: Map<string, (ButtonInteraction) => void>;
   private readonly restClient: REST;
 
   public static getInstance(): Bot {
@@ -52,7 +53,12 @@ export class Bot {
     ]});
 
     this.commands = new Map<string, Command>();
+    this.buttons = new Map<string, (ButtonInteraction) => void>();
     this.restClient = new REST({ version: '9' }).setToken(process.env.TOKEN);
+  }
+
+  public setButton(buttonId: string, callback: (ButtonInteraction) => void): void {
+    this.buttons.set(buttonId, callback);
   }
 
   private async start(): Promise<void> {
@@ -85,15 +91,26 @@ export class Bot {
     });
 
     this.client.on('interactionCreate', async (interaction) => {
-      if(!interaction.isCommand()) return ;
+      if (interaction.isCommand()) {
+        const commandInteraction = interaction as CommandInteraction;
+        const command: Command = this.commands.get(commandInteraction.commandName);
 
-      const command: Command = this.commands.get(interaction.commandName);
-      if(!command) {
-        console.warn(`Error: command ${interaction.commandName} not found!`);
-        return ;
+        if(!command) {
+          console.warn(`Error: command ${commandInteraction.commandName} not found!`);
+          return ;
+        }
+  
+        command.execution(commandInteraction);
       }
+      else if (interaction.isButton()) {
+        const buttonInteraction = interaction as ButtonInteraction;
+        const buttonFunction = this.buttons.get(buttonInteraction.customId);
 
-      command.execution(interaction);
+        if(buttonFunction) {
+          buttonFunction(interaction);
+        }
+      }
+      else { return ; }
     })
 
     this.client.on('disconnect', function () {
