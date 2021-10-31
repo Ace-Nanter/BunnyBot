@@ -9,7 +9,8 @@ RUN apt-get install ffmpeg -y
 # Install app dependencies
 COPY package.json ./
 COPY package-lock.json ./
-COPY ./node_modules ./node_modules
+
+RUN npm install --production
 
 # Bundle app source
 COPY dist ./
