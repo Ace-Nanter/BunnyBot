@@ -1,10 +1,9 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { ClientEvents } from 'discord.js';
 import { Command } from './command.model';
 
 export abstract class BotModule {
 
-  constructor(params: any) { }
+  constructor() { }
 
   protected callbacks: Map<keyof ClientEvents, ((...args: ClientEvents[keyof ClientEvents]) => void)>;
   protected commands: Map<string, Command>;

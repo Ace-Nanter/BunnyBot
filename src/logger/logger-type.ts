@@ -1,4 +1,4 @@
-const enum LoggerType {
-    DiscordLogger = 0,
-    MongoLogger = 1
+export enum LoggerType {
+  DiscordLogger = 0,
+  MongoLogger = 1
 }

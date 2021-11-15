@@ -7,8 +7,8 @@ export class SpyModule extends BotModule {
   private static targetGuild: Guild;
   private static spiedGuild: Guild;
 
-  constructor(params: any) {
-    super(params);
+  constructor(params: unknown) {
+    super();
 
     if(params && params['targetGuild'] && params['spiedGuild']) {
       SpyModule.targetGuild = Bot.getClient().guilds.resolve(params['targetGuild']);
@@ -27,7 +27,7 @@ export class SpyModule extends BotModule {
     if(message.author.id !== Bot.getId()) {
       if(message.guild === SpyModule.spiedGuild) {
         const targetChannel = SpyModule.targetGuild.channels.cache.find(c => c.name === originChannel.name) as TextChannel;
-        let msgTmp: string = `${message.author.username} : ${message.content}`;
+        const msgTmp = `${message.author.username} : ${message.content}`;
 
         // Create channel if it doesn't exist
         if(!targetChannel) {

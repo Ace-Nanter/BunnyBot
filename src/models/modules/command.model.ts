@@ -21,19 +21,18 @@ export class Command {
       const userIds: Set<Snowflake> = new Set();
 
       for await (const permission of command.permissions) {
-
-        let snowflakes = await Command.findUsers(permission, guild);
+        const snowflakes = await Command.findUsers(permission, guild);
   
         for(const snowflake of snowflakes) {
           userIds.add(snowflake);
         }
-      };
+      }
 
       const permissions: ApplicationCommandPermissionData[] = Array.from(userIds.values()).map(userId => {
         return { id: userId, type: 'USER', permission: true };
       });
       permissionsPerGuild.set(guild.id, permissions);      
-    };
+    }
 
     return permissionsPerGuild;
   }
@@ -46,9 +45,7 @@ export class Command {
         return GuildHelper.findGuildOwner(guild);
       case (CommandPermission.ADMIN):
         return GuildHelper.findAdmins(guild);
-      case (CommandPermission.MODERATOR):
-        return GuildHelper.findModerators(guild);
-      case (CommandPermission.EVERYONE):
+      case (CommandPermission.EVERYONE || CommandPermission.MODERATOR):
         return Promise.resolve([]);
     }
   }

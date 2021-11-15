@@ -4,6 +4,7 @@ import { Client, Intents, Snowflake } from 'discord.js';
 import { exit } from 'process';
 import { Dao } from './dao/dao';
 import { Logger } from './logger/logger';
+import { LoggerType } from './logger/logger-type';
 import { Command } from './models/modules/command.model';
 import { ModuleConfig } from './models/modules/module-config';
 import { ModuleLoader } from './modules/module-loader';
@@ -16,7 +17,7 @@ export class Bot {
   private commands: Map<string, Command>;
   private readonly restClient: REST;
 
-  public static getInstance() {
+  public static getInstance(): Bot {
     if (!Bot.Instance) {
       Bot.Instance = new Bot();
     }
@@ -24,7 +25,7 @@ export class Bot {
     return Bot.Instance;
   }
 
-  public static getClient() {
+  public static getClient(): Client {
     return Bot.getInstance().client;
   }
 
@@ -32,7 +33,7 @@ export class Bot {
     return Bot.getInstance().client.user.id;
   }
 
-  public static start() {
+  public static start(): Promise<void> {
     return Bot.getInstance().start();
   }
 
@@ -112,7 +113,7 @@ export class Bot {
 
   private loadModules(moduleConfigList: ModuleConfig[]) {
     moduleConfigList.forEach(moduleConfig => {
-      var module = ModuleLoader.loadModule(moduleConfig);
+      const module = ModuleLoader.loadModule(moduleConfig);
 
       // Load module events
       if (module && module.getEventsCovered()) {

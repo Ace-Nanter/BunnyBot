@@ -10,8 +10,9 @@ export class AdministrationModule extends BotModule {
 
   private static leaveMessageByGuild: Map<Snowflake, LeaveParam>;
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   constructor(params: any) {
-    super(params);
+    super();
 
     if (params) {
       this.init(params);
