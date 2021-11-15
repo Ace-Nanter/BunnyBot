@@ -1,8 +1,7 @@
 import { getVoiceConnection } from '@discordjs/voice';
-import { ButtonInteraction, VoiceState } from 'discord.js/typings/index.js';
-import { Bot } from '../../bot';
+import { ButtonInteraction, Interaction, SelectMenuInteraction, VoiceState } from 'discord.js';
 import { BotModule } from '../../models/modules/bot-module.model';
-import { default as PlayCommandClass } from './commands/play.command';
+import { default as MusicCommandClass } from './commands/music.command';
 import { GuildMusic } from './models/guild-music.model';
 
 export class MusicModule extends BotModule {
@@ -11,27 +10,48 @@ export class MusicModule extends BotModule {
 
   guildMusicMap: Map<string, GuildMusic>;
 
-  constructor(params: any) {
+  constructor() {
     super();
 
     this.callbacks = new Map();
 
     this.commands = [];
-    this.commands.push(new PlayCommandClass(this));
+    this.commands.push(new MusicCommandClass(this));
 
     this.guildMusicMap = new Map();
     this.callbacks.set('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => { this.onVoiceChannelUpdate(oldState, newState); });
-
-    this.initButtons();
+    this.callbacks.set('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => { this.onVoiceChannelUpdate(oldState, newState); });
+    this.callbacks.set('interaction', async (interaction: Interaction) => { this.onInteraction(interaction); })
   }
 
-  private initButtons() {
-    const bot: Bot = Bot.getInstance();
-    bot.setButton('music-rewind', (interaction) => { this.onRewindButton(interaction); });
-    bot.setButton('music-fast-forward', (interaction) => { this.onFastForwardButton(interaction); });
-    bot.setButton('music-pause', (interaction) => { this.onPauseButton(interaction); });
-    bot.setButton('music-play', (interaction) => { this.onPlayButton(interaction); });
-    bot.setButton('music-stop', (interaction) => { this.onStopButton(interaction); });
+  private async onInteraction(interaction: Interaction) {
+    if (interaction.isButton()) {
+      switch (interaction.customId) {
+        case 'music-rewind':
+          this.onRewindButton(interaction);
+          break;
+        case 'music-fast-forward':
+          this.onFastForwardButton(interaction);
+          break;
+        case 'music-pause':
+          this.onPauseButton(interaction);
+          break;
+        case 'music-play':
+          this.onPlayButton(interaction);
+          break;
+        case 'music-stop':
+          this.onStopButton(interaction);
+          break;
+        case 'music-delete':
+          this.onDeleteButton(interaction);
+          break;
+      }
+    }
+    else if (interaction.isSelectMenu() && interaction.customId === 'music-delete-menu') {
+      this.onDeleteMenu(interaction);
+      console.log(interaction);
+      // TODO : to complete
+    }
   }
 
   /**
@@ -89,7 +109,19 @@ export class MusicModule extends BotModule {
     this.guildMusicMap.delete(interaction.guild.id);
   }
 
-  private getGuildMusic(interaction: ButtonInteraction): GuildMusic {
+  private onDeleteButton(interaction: ButtonInteraction): void {
+    interaction.deferUpdate();
+    const serverQueue = this.getGuildMusic(interaction);
+    serverQueue.displayDeleteMenu();
+  }
+
+  private onDeleteMenu(interaction: SelectMenuInteraction): void {
+    interaction.deferUpdate();
+    const serverQueue = this.getGuildMusic(interaction);
+    serverQueue.removeFromQueue(interaction.values);
+  }
+
+  private getGuildMusic(interaction: ButtonInteraction | SelectMenuInteraction): GuildMusic {
     if(!this.guildMusicMap || this.guildMusicMap.size === 0) return;
 
     return this.guildMusicMap.get(interaction.guild.id);

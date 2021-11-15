@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandsOnlyBuilder } from '@discordjs/builders';
 import { ApplicationCommandPermissionData, CommandInteraction, OAuth2Guild, Snowflake } from 'discord.js';
 import { Bot } from '../../bot';
 import { GuildHelper } from '../../utils/guild.helper';
@@ -11,7 +11,7 @@ export abstract class Command {
 
   abstract name: string;
   abstract description: string;
-  abstract slashCommand: SlashCommandBuilder;
+  abstract slashCommand: SlashCommandBuilder | SlashCommandSubcommandBuilder | SlashCommandSubcommandsOnlyBuilder;
   abstract permissions: CommandPermission[];
   abstract execution: (interaction: CommandInteraction) => Promise<void>;
 

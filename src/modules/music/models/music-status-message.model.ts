@@ -1,4 +1,4 @@
-import { Guild, Message, MessageActionRow, MessageButton, MessageEmbed, WebhookEditMessageOptions } from 'discord.js';
+import { Guild, Message, MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, WebhookEditMessageOptions } from 'discord.js';
 import { GuildMusic } from './guild-music.model';
 
 export class MusicStatusMessage {
@@ -29,8 +29,8 @@ export class MusicStatusMessage {
   /**
    * Refresh status message
    */
-  public refresh(): void {
-    const payload = this.composeStatusMessage();
+  public refresh(deleteMenu?: boolean): void {
+    const payload = this.composeStatusMessage(deleteMenu);
 
     if(this.message) {
       this.message.edit(payload);
@@ -41,8 +41,7 @@ export class MusicStatusMessage {
    * Composes status message for the server queue, with the list of the songs and the currently played song
    * @returns a message embed containing every information about server queue state
    */
-   public composeStatusMessage(): WebhookEditMessageOptions {
-
+   public composeStatusMessage(deleteMenu?: boolean): WebhookEditMessageOptions {
     const queue = this.guildMusic.musicQueue;
 
     const message: MessageEmbed = new MessageEmbed()
@@ -65,10 +64,22 @@ export class MusicStatusMessage {
     }
 
     const payload = { embeds: [message] };
-    const raw = this.getMessageButtons();
+    const components = [];
+    const buttons = this.getMessageButtons();
 
-    if(raw != null) {
-      payload['components'] = [raw];
+    if (buttons) {
+      components.push(buttons);
+    }
+
+    if (buttons && deleteMenu) {
+      const menu = this.createDeleteMenu();
+      if (menu) {
+        components.push(menu);
+      }
+    }
+
+    if(components !== null && components.length > 0) {
+      payload['components'] = components;
     }
 
     return payload;
@@ -83,6 +94,11 @@ export class MusicStatusMessage {
 
     const queue = this.guildMusic.musicQueue;
     const messageActionRow = new MessageActionRow();
+
+    const deleteButton = new MessageButton()
+      .setCustomId('music-delete')
+      .setEmoji('🗑')
+      .setStyle('SECONDARY')
 
     const rewindButton = new MessageButton()
       .setCustomId('music-rewind')
@@ -109,6 +125,10 @@ export class MusicStatusMessage {
       .setEmoji('⏹')
       .setStyle('DANGER');
 
+    if(!queue.isEmpty()) {
+      messageActionRow.addComponents(deleteButton);
+    }
+
     if(queue.hasPrevious()) {
       messageActionRow.addComponents(rewindButton);
     }
@@ -128,5 +148,30 @@ export class MusicStatusMessage {
     return messageActionRow;
   }
   
+  /**
+   * Displays select menu to delete songs from queue
+   */
+  private createDeleteMenu(): MessageActionRow {
+    
+    const queue = this.guildMusic.musicQueue;
+    const row = new MessageActionRow();
+    const selectMenu = new MessageSelectMenu();
+
+    selectMenu.setCustomId('music-delete-menu');
+    selectMenu.setPlaceholder('Choose songs to remove from queue');
+    
+    const options = queue.getDeleteMenuOptions();
+
+    if(options && options.length > 0) {
+      selectMenu.addOptions(options);
+      selectMenu.setMaxValues(options.length);
+      row.addComponents(selectMenu);
+
+      return row;
+    }
+    
+    return null;
+  }
+
   // ⏮⏭⏹▶⏸🔁🔂
 }
