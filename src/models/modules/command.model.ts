@@ -45,9 +45,7 @@ export class Command {
         return GuildHelper.findGuildOwner(guild);
       case (CommandPermission.ADMIN):
         return GuildHelper.findAdmins(guild);
-      case (CommandPermission.MODERATOR):
-        return GuildHelper.findModerators(guild);
-      case (CommandPermission.EVERYONE):
+      case (CommandPermission.EVERYONE || CommandPermission.MODERATOR):
         return Promise.resolve([]);
     }
   }
