@@ -36,8 +36,4 @@ export class GuildHelper {
       });
     });
   }
-  
-  public static async findModerators(guild: OAuth2Guild): Promise<Snowflake[]> {
-    throw new Error('Not implemented yet!');
-  }
 }

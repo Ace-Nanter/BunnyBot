@@ -18,6 +18,7 @@ export class GamesRolesModule extends BotModule {
 
   private static instance: GamesRolesModule;
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   constructor(params: any) {
     super();
 
