@@ -16,8 +16,9 @@ export class NewRoleModule extends BotModule {
   private static message: Message;
   private static reactionName: string;
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   constructor(params: any) {
-    super(params);
+    super();
 
     this.init(params);
 
