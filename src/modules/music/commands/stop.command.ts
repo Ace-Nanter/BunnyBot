@@ -1,74 +1,39 @@
-// import { Command } from "../../types/Command";
-// import { SlashCommandBuilder } from "@discordjs/builders";
-// import { getVoiceConnection } from "@discordjs/voice";
-// import {
-//   CommandInteraction,
-//   GuildMember,
-//   Message,
-//   VoiceChannel,
-// } from "discord.js";
+import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
+import { getVoiceConnection } from '@discordjs/voice';
+import { CommandInteraction } from 'discord.js';
+import { Command } from '../../../models/modules/command.model';
+import { MusicModule } from '../music.module';
+import { CommandPermission } from './../../../models/modules/command-permission.enum';
 
-// export default class Stop extends Command {
-//   name = "stop";
-//   visible = true;
-//   description = "Remove all songs from the current queue";
-//   information = "";
-//   aliases = [];
-//   args = false;
-//   usage = "";
-//   example = "";
-//   cooldown = 0;
-//   category = "music";
-//   guildOnly = true;
-//   data = new SlashCommandBuilder()
-//     .setName(this.name)
-//     .setDescription(this.description);
-//   execute = (message: Message): Promise<Message> => {
-//     return message.channel.send({
-//       embeds: [
-//         this.stop(
-//           message.member.voice.channel as VoiceChannel,
-//           message.guild.id
-//         ),
-//       ],
-//     });
-//   };
-//   executeSlash = (interaction: CommandInteraction): Promise<void> => {
-//     interaction.member = interaction.member as GuildMember;
-//     return interaction.reply({
-//       embeds: [
-//         this.stop(
-//           interaction.member.voice.channel as VoiceChannel,
-//           interaction.guild.id
-//         ),
-//       ],
-//     });
-//   };
+export default class StopCommand extends Command {
+  name = 'stop';
+  visible = true;
+  description = 'Stops music and disconnect bot';
+  permissions = [ CommandPermission.EVERYONE ];
 
-//   /**
-//    * Attempts to stop the current queue
-//    *
-//    * @param voiceChannel the voice channel the user is in
-//    * @param guildId the id of the server this command is used in
-//    * @returns a message embed with the status of stopping the queue
-//    */
-//   private stop(voiceChannel: VoiceChannel, guildId: string) {
-//     const musicQueue = this.client.musicQueue;
-//     const serverQueue = musicQueue.get(guildId);
+  slashCommand = new SlashCommandSubcommandBuilder()
+    .setName(this.name)
+    .setDescription(this.description);
+  
+  execution = async (interaction: CommandInteraction): Promise<void> => {
 
-//     if (!serverQueue) {
-//       return this.createColouredEmbed(
-//         "There is no active music queue in the server!"
-//       );
-//     }
+    const connection = getVoiceConnection(interaction.guild.id);
+    const serverQueue = this.musicModule.guildMusicMap.get(interaction.guild.id);
 
-//     if (serverQueue.voiceChannel !== voiceChannel) {
-//       return this.createColouredEmbed("You are not in the right voice channel");
-//     }
+    if(!serverQueue && !connection) {
+      interaction.reply({ content: 'There is no music here... Did you mean to use the command `/music play`?', ephemeral: true});
+      return ;
+    }
 
-//     serverQueue.songs = [];
-//     const connection = getVoiceConnection(guildId);
-//     connection.destroy();
-//     return this.createColouredEmbed("Removed all songs from the queue");
-//   }
-// }
+    if(serverQueue) {
+      serverQueue.disconnect();  
+    }
+    
+    interaction.reply({ content: 'See you soon! 👋' });
+    setTimeout(() => { interaction.deleteReply(); }, 10000);
+  };
+
+  private get musicModule(): MusicModule {
+    return this.module as MusicModule;
+  }
+}

@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { MessageEmbed, MessageSelectOptionData } from "discord.js";
 import { Song } from "./song.model";
 
 /**
@@ -80,6 +80,21 @@ import { Song } from "./song.model";
   }
 
   /**
+   * Remove a song from queue
+   */
+  public remove(index: number): void {
+    if (this.songIndex === index) {
+      return ;
+    }
+
+    if (this.songIndex > index) {
+      this.songIndex--;
+    }
+
+    this.songs.splice(index, 1);
+  }
+
+  /**
    * Add song list to the given message
    * @param message Given message in which a field containing song list should be added
    * @param isPlaying Tells if the music is currently being played or not
@@ -109,5 +124,14 @@ import { Song } from "./song.model";
     });
 
     return result;
+  }
+
+  /**
+   * Add options to delete select menu
+   * @param deleteMenu Menu to select songs to remove from queue
+   */
+  public getDeleteMenuOptions(): MessageSelectOptionData[] {
+    return this.songs.filter((song: Song, index: number) => index !== this.songIndex)
+      .map((song: Song) => { return { label: song.title, description: song.title, value: this.songs.indexOf(song).toString() }; });
   }
 }

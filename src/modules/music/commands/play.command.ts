@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, Guild, GuildMember, Message, MessageEmbed, StageChannel, VoiceChannel } from 'discord.js';
 import { Bot } from '../../../bot';
 import { Command } from '../../../models/modules/command.model';
@@ -14,7 +14,7 @@ export default class PlayCommand extends Command {
   description = 'Add a song from url to the queue';
   permissions = [ CommandPermission.EVERYONE ];
 
-  slashCommand = new SlashCommandBuilder()
+  slashCommand = new SlashCommandSubcommandBuilder()
     .setName(this.name)
     .setDescription(this.description)
     .addStringOption((option) =>
@@ -22,7 +22,7 @@ export default class PlayCommand extends Command {
         .setName('song')
         .setDescription('The name of the song to play or URL')
         .setRequired(true)
-    ).setDefaultPermission(true);
+    );
   
   execution = async (interaction: CommandInteraction): Promise<void> => {
     await interaction.deferReply();

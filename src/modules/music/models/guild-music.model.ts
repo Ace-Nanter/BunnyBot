@@ -101,6 +101,24 @@ import ytdl = require('ytdl-core');
   }
 
   /**
+   * Displays delete menu for member to select songs to remove from queue
+   */
+  public displayDeleteMenu(): void {
+    this.statusMessage.refresh(true);
+  }
+
+  /**
+   * Removed selected songs from queue
+   */
+  public removeFromQueue(values: string[]): void {
+    values.forEach((value: string) => {
+      this.queue.remove(parseInt(value));
+    });
+
+    this.statusMessage.refresh();
+  }
+
+  /**
    * Plays the next song in the queue. Once the song ends, pop it from the
    * queue and recursively call this function
    *
