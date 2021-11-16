@@ -6,7 +6,7 @@ export abstract class BotModule {
   constructor() { }
 
   protected callbacks: Map<keyof ClientEvents, ((...args: ClientEvents[keyof ClientEvents]) => void)>;
-  protected commands: Map<string, Command>;
+  protected commands: Command[];
 
   getEventsCovered(): (keyof ClientEvents)[] {
     return this.callbacks && this.callbacks.size > 0 ?
@@ -17,7 +17,7 @@ export abstract class BotModule {
     return this.callbacks.get(eventType);
   }
 
-  getCommands(): Map<string, Command> {
+  getCommands(): Command[] {
     return this.commands;
   }
 }

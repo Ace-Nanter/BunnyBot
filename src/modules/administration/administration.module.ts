@@ -2,9 +2,9 @@ import { ActivityOptions, GuildChannel, GuildMember, Snowflake, TextChannel } fr
 import { Bot } from '../../bot';
 import { Logger } from '../../logger/logger';
 import { BotModule } from "../../models/modules/bot-module.model";
-import { clearCommand } from "./clear.command";
 import { LeaveParam } from './leave-param.model';
-import { setActivityCommand } from "./set-activity.command";
+import { default as SetActivityCommandClass } from './set-activity.command';
+import { default as ClearCommandClass } from './clear.command';
 
 export class AdministrationModule extends BotModule {
 
@@ -21,10 +21,9 @@ export class AdministrationModule extends BotModule {
     this.callbacks = new Map();
     this.callbacks.set('guildMemberRemove', AdministrationModule.onGuildMemberRemoved);
 
-    this.commands = new Map();
-
-    this.commands.set(setActivityCommand.slashCommand.name, setActivityCommand);
-    this.commands.set(clearCommand.slashCommand.name, clearCommand);
+    this.commands = [];
+    this.commands.push(new SetActivityCommandClass(this));
+    this.commands.push(new ClearCommandClass(this));
   }
 
   private init(params: any[]): void {
