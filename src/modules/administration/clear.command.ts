@@ -4,9 +4,13 @@ import { Logger } from '../../logger/logger';
 import { CommandPermission } from '../../models/modules/command-permission.enum';
 import { Command } from '../../models/modules/command.model';
 
-export const clearCommand = new Command (
+export default class ClearCommand extends Command {
+  name = 'clear';
+  description = 'Clear messages';
 
-  new SlashCommandBuilder().setName('clear')
+  permissions = [ CommandPermission.OWNER, CommandPermission.GUILD_OWNER, CommandPermission.ADMIN ];
+  
+  slashCommand = new SlashCommandBuilder().setName('clear')
   .setDescription('Clear messages')
   .addIntegerOption(option => 
     option
@@ -14,9 +18,9 @@ export const clearCommand = new Command (
     .setDescription('Number of messages which should be deleted')
     .setRequired(true)
   )
-  .setDefaultPermission(false),
-  [ CommandPermission.OWNER, CommandPermission.GUILD_OWNER, CommandPermission.ADMIN ],
-  async (interaction: CommandInteraction) => {
+  .setDefaultPermission(false);
+
+  execution = async (interaction: CommandInteraction): Promise<void> => {
     const count = interaction.options.getInteger('count');
     
     if(count < 1 || count > 99) {
@@ -36,5 +40,5 @@ export const clearCommand = new Command (
       setTimeout(() => { interaction.deleteReply(); }, 10000);
 		});
   }
-)
-  
+}
+ 

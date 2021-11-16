@@ -25,7 +25,7 @@ jobs:
     - name: Setup node
       uses: actions/setup-node@v2
       with:
-        node-version: 12.x
+        node-version: 16.x
 
     - name: npm install
       run: npm install
@@ -46,7 +46,6 @@ jobs:
   dockerize:
     runs-on: ubuntu-latest
     needs: checkAndBuild
-    if: github.event_name != 'pull_request'
     env:
       IMAGE_NAME: bunny-bot
       DOCKER_TARGET_PLATFORM: linux/arm64
@@ -72,9 +71,28 @@ jobs:
         name: dist
         path: dist
 
-    - name: Prepare build
-      if: success()
-      id: prepare
+    - name: Prepare build (pull request)
+      if: success() && github.event_name == 'pull_request'
+      id: prepare-integration
+      run: |
+        IMAGE_ID=${{ secrets.DOCKER_REGISTRY_HOST }}/$IMAGE_NAME
+    
+        # Change all uppercase to lowercase
+        IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          
+        # Define version as "integration"
+        VERSION=integration
+
+        # Strip "v" prefix from tag name
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+        echo ::set-output name=docker_platform::${DOCKER_TARGET_PLATFORM}
+        echo ::set-output name=docker_image::$IMAGE_ID
+        echo ::set-output name=version::$VERSION
+    
+    - name: Prepare build (deployment)
+      if: success() && github.event_name != 'pull_request'
+      id: prepare-latest
       run: |
         IMAGE_ID=${{ secrets.DOCKER_REGISTRY_HOST }}/$IMAGE_NAME
     
@@ -93,13 +111,20 @@ jobs:
         echo ::set-output name=docker_platform::${DOCKER_TARGET_PLATFORM}
         echo ::set-output name=docker_image::$IMAGE_ID
         echo ::set-output name=version::$VERSION
-    
+
     - name: Login to Docker Registry
       if: success()
       run: |        
         echo "${DOCKER_PASSWORD}" | docker login ${DOCKER_REGISTRY} --username "${DOCKER_USERNAME}" --password-stdin
 
-    - name: Run Buildx (Build and push)
-      if: success()
+    - name: Run Buildx (Build and push to integration)
+      if: success() && github.event_name == 'pull_request'
       run: |        
-        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} --output type=image --push .
+        docker buildx build --platform ${{ steps.prepare-integration.outputs.docker_platform }} --tag ${{ steps.prepare-integration.outputs.docker_image }}:${{ steps.prepare-integration.outputs.version }} --output type=image --push .
+
+    - name: Run Buildx (Build and push to production)
+      if: success() && github.event_name != 'pull_request'
+      run: |
+        docker buildx build --platform ${{ steps.prepare-latest.outputs.docker_platform }} --tag ${{ steps.prepare-latest.outputs.docker_image }}:${{ steps.prepare-latest.outputs.version }} --output type=image --push .
+
+    

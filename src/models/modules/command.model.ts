@@ -1,17 +1,25 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { ApplicationCommandPermissionData, Interaction, OAuth2Guild, Snowflake } from 'discord.js';
+import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandsOnlyBuilder } from '@discordjs/builders';
+import { ApplicationCommandPermissionData, CommandInteraction, OAuth2Guild, Snowflake } from 'discord.js';
 import { Bot } from '../../bot';
 import { GuildHelper } from '../../utils/guild.helper';
+import { BotModule } from './bot-module.model';
 import { CommandPermission } from './command-permission.enum';
 
-export class Command {
-  constructor(
-    public slashCommand: SlashCommandBuilder,
-    public permissions: CommandPermission[],
-    public execution: ((interaction: Interaction) => void)
-  ) { }
+export abstract class Command {
 
-  public static async buildPermissionsPerGuild(command: Command): Promise<Map<Snowflake, ApplicationCommandPermissionData[]>> {
+  protected module: BotModule;
+
+  abstract name: string;
+  abstract description: string;
+  abstract slashCommand: SlashCommandBuilder | SlashCommandSubcommandBuilder | SlashCommandSubcommandsOnlyBuilder;
+  abstract permissions: CommandPermission[];
+  abstract execution: (interaction: CommandInteraction) => Promise<void>;
+
+  public constructor(module: BotModule) {
+    this.module = module;
+  }
+
+  public async buildPermissionsPerGuild(): Promise<Map<Snowflake, ApplicationCommandPermissionData[]>> {
 
     const permissionsPerGuild: Map<Snowflake, ApplicationCommandPermissionData[]> = new Map();
     const guilds = await Bot.getClient().guilds.fetch();
@@ -20,8 +28,8 @@ export class Command {
 
       const userIds: Set<Snowflake> = new Set();
 
-      for await (const permission of command.permissions) {
-        const snowflakes = await Command.findUsers(permission, guild);
+      for await (const permission of this.permissions) {
+        const snowflakes = await this.findUsers(permission, guild);
   
         for(const snowflake of snowflakes) {
           userIds.add(snowflake);
@@ -37,7 +45,7 @@ export class Command {
     return permissionsPerGuild;
   }
 
-  private static findUsers(permission: CommandPermission, guild: OAuth2Guild): Promise<Snowflake[]> {
+  private findUsers(permission: CommandPermission, guild: OAuth2Guild): Promise<Snowflake[]> {
     switch (permission) {
       case (CommandPermission.OWNER): 
         return Promise.resolve([process.env.OWNER_ID]);
@@ -46,7 +54,7 @@ export class Command {
       case (CommandPermission.ADMIN):
         return GuildHelper.findAdmins(guild);
       case (CommandPermission.EVERYONE || CommandPermission.MODERATOR):
-        return Promise.resolve([]);
+        return Promise.resolve([process.env.OWNER_ID]);
     }
   }
 }
