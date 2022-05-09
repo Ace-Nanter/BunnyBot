@@ -6,13 +6,11 @@ import { EmbedHelper } from '../../../utils/embed.helper';
 import { GuildMusic } from '../models/guild-music.model';
 import { Song } from '../models/song.model';
 import { MusicModule } from '../music.module';
-import { CommandPermission } from './../../../models/modules/command-permission.enum';
 
 export default class PlayCommand extends Command {
   name = 'play';
   visible = true;
   description = 'Add a song from url to the queue';
-  permissions = [ CommandPermission.EVERYONE ];
 
   slashCommand = new SlashCommandSubcommandBuilder()
     .setName(this.name)
