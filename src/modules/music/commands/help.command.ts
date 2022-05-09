@@ -1,13 +1,11 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { Command } from '../../../models/modules/command.model';
-import { CommandPermission } from './../../../models/modules/command-permission.enum';
 
 export default class StopCommand extends Command {
   name = 'help';
   visible = true;
   description = 'Display how to use music module';
-  permissions = [ CommandPermission.EVERYONE ];
 
   slashCommand = new SlashCommandSubcommandBuilder()
     .setName(this.name)

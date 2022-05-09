@@ -151,17 +151,6 @@ export class Bot {
       Logger.error(error);
       this.disconnect();
     }
-    
-    (await this.client.application?.commands.fetch()).forEach(async (applicationCommand, id: Snowflake) => {
-      const command = this.commands.get(applicationCommand.name);
-
-      if(command) {
-        const permissionsPerGuild = await command.buildPermissionsPerGuild();
-        permissionsPerGuild.forEach((permissions, guildId) => {
-          this.client.application?.commands.permissions.set({  command: id, guild: guildId, permissions: permissions });
-        });
-      }
-    });
   }
 
   /**

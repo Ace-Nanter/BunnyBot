@@ -1,15 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, TextChannel } from 'discord.js';
 import { Logger } from '../../logger/logger';
-import { CommandPermission } from '../../models/modules/command-permission.enum';
 import { Command } from '../../models/modules/command.model';
 
 export default class ClearCommand extends Command {
   name = 'clear';
   description = 'Clear messages';
 
-  permissions = [ CommandPermission.OWNER, CommandPermission.GUILD_OWNER, CommandPermission.ADMIN ];
-  
   slashCommand = new SlashCommandBuilder().setName('clear')
   .setDescription('Clear messages')
   .addIntegerOption(option => 

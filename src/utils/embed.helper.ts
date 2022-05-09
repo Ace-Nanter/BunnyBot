@@ -1,4 +1,4 @@
-import { ColorResolvable, Message, MessageEmbed, TextBasedChannels } from 'discord.js';
+import { ColorResolvable, Message, MessageEmbed, TextBasedChannel } from 'discord.js';
 
 export class EmbedHelper {
 
@@ -24,7 +24,7 @@ export class EmbedHelper {
    * @param message the message to send
    * @returns a promise for the sent message
    */
-   public static createAndSendEmbed(channel: TextBasedChannels, description?: string): Promise<Message> {
+   public static createAndSendEmbed(channel: TextBasedChannel, description?: string): Promise<Message> {
     return channel.send({ embeds: [EmbedHelper.createColouredEmbed('BLUE', description)] });
   }
 }

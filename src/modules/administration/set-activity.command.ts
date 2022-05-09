@@ -2,14 +2,11 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { Bot } from '../../bot';
 import { Dao } from '../../dao/dao';
-import { CommandPermission } from '../../models/modules/command-permission.enum';
 import { Command } from '../../models/modules/command.model';
 
 export default class SetActivityCommand extends Command {
   name = 'set-activity';
   description = 'Define bot status';
-
-  permissions = [ CommandPermission.OWNER, CommandPermission.GUILD_OWNER ];
   
   slashCommand = new SlashCommandBuilder().setName(this.name)
   .setDescription(this.description)

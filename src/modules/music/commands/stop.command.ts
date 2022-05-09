@@ -3,13 +3,11 @@ import { getVoiceConnection } from '@discordjs/voice';
 import { CommandInteraction } from 'discord.js';
 import { Command } from '../../../models/modules/command.model';
 import { MusicModule } from '../music.module';
-import { CommandPermission } from './../../../models/modules/command-permission.enum';
 
 export default class StopCommand extends Command {
   name = 'stop';
   visible = true;
   description = 'Stops music and disconnect bot';
-  permissions = [ CommandPermission.EVERYONE ];
 
   slashCommand = new SlashCommandSubcommandBuilder()
     .setName(this.name)
