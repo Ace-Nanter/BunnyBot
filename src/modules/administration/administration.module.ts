@@ -76,7 +76,7 @@ export class AdministrationModule extends BotModule {
           return ;
         }
 
-        const message = param.message.replace('#user#', member.toString());
+        const message = param.message.replace('#user#', member.user.username);
         (channel as TextChannel).send(message);
     });
   }
