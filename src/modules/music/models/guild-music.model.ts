@@ -264,7 +264,6 @@ import ytdl = require('ytdl-core');
     setTimeout(() => {
       if (this.queue.isEmpty() || this.queue.hasReachEnd()) {
         this.disconnect();
-        // TODO : remove from module
         return;
       }
     }, MusicModule.STANDBY_DURATION);

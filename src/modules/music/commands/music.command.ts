@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
-import { Command } from '../../../models/modules/command.model';
+import { Command } from '../../../models/command.model';
 import { MusicModule } from '../music.module';
 import { default as PlayCommandClass } from './play.command';
 import { default as StopCommandClass } from './stop.command';
