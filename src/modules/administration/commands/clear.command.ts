@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, TextChannel } from 'discord.js';
-import { Logger } from '../../logger/logger';
-import { Command } from '../../models/modules/command.model';
+import { Logger } from '../../../logger/logger';
+import { Command } from '../../../models/command.model';
 
 export default class ClearCommand extends Command {
   name = 'clear';
