@@ -1,6 +1,8 @@
-import { Activity, Collection, Guild, GuildMember } from 'discord.js';
+import { Activity, Collection, Guild, GuildMember, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { Logger } from '../../../logger/logger';
-import { Game, IGame } from '../game.model';
+import { Bot } from '../../../bot';
+import { Game, IGame } from '../models/game.model';
+import { IGuildGame } from '../models/guild-game.model';
 
 export class ActivityScanner {
 
@@ -47,8 +49,10 @@ export class ActivityScanner {
       await new Game({
         applicationId: activity.applicationId,
         gameName: activity.name,
-        enabled: false
+        enabled: []
       }).save();
+
+      this.createLogMessage(activity);
 
       return Promise.resolve();
     } else {
@@ -64,13 +68,14 @@ export class ActivityScanner {
    * @returns A Promise
    */
   private async assignGame(member: GuildMember, game: IGame): Promise<void> {
-    if (!game.enabled || !game.role) {
+    const guildGame: IGuildGame = game.guildGames.find(guildGame => guildGame.guildId === member.guild.id);
+    if (!guildGame || !guildGame.role) {
       return Promise.resolve();
     }
 
-    const role = await this.guild.roles.fetch(game.role.id);
+    const role = await this.guild.roles.fetch(guildGame.role.id);
     if (!role) {
-      Logger.warn(`Error: role ${game.role.id} does not exist in guild ${this.guild.name}`);
+      Logger.warn(`Error: role ${guildGame.role.id} does not exist in guild ${this.guild.name}`);
       return Promise.resolve();
     }
 
@@ -79,6 +84,28 @@ export class ActivityScanner {
     return Promise.resolve();
   }
   
+  private async createLogMessage(activity: Activity): Promise<void> {
+    if (!process.env.LOG_CHANNEL_ID) return ;
+    
+    const channel = await Bot.getClient().channels.fetch(process.env.LOG_CHANNEL_ID);
+
+    if (!channel || !channel.isText()) return ;
+    
+    const messageEmbed = new MessageEmbed()
+      .setColor('#0000FF')
+      .setDescription(`Created game ${activity.name} with ID ${activity.applicationId}`)
+      .setTitle('Log');
+
+    const row = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setLabel('Ban')
+        .setCustomId(`ban-game-${activity.applicationId}`)
+        .setStyle('DANGER')
+    )
+
+    channel.send({ embeds: [messageEmbed], components: [row] });
+  }
+
   /**
    * Stop activity scanning
    */

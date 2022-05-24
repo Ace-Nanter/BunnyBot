@@ -1,9 +1,10 @@
-import { Guild, Snowflake } from "discord.js";
-import { Bot } from "../../bot";
-import { Logger } from "../../logger/logger";
-import { BotModule } from "../../models/bot-module.model";
-import { Game } from "./models/game.model";
-import { ActivityScanner } from "./services/activity-scanner.service";
+import { ButtonInteraction, Guild, Interaction } from 'discord.js';
+import { Bot } from '../../bot';
+import { Logger } from '../../logger/logger';
+import { BotModule } from '../../models/bot-module.model';
+import { default as GamesRolesCommand } from './commands/game.command-group';
+import { Game, IGame } from './models/game.model';
+import { ActivityScanner } from './services/activity-scanner.service';
 
 export class GamesRolesModule extends BotModule {
 
@@ -11,11 +12,11 @@ export class GamesRolesModule extends BotModule {
   private guild: Guild;
 
   protected initCallbacks(): void {
-    //this.callbacks.set('guildMemberAdd', GamesRolesModule.onGuildMemberAdd);
+    this.callbacks.set('interactionCreate', async (interaction: Interaction) => { this.onInteraction(interaction); })
   }
 
   protected initCommands(): void {
-    return ;
+    this.commands.push(new GamesRolesCommand(this));
   }
 
   protected async initModule(params?: any[]): Promise<void> {
@@ -53,6 +54,26 @@ export class GamesRolesModule extends BotModule {
 
   //   }
 
+  }
+
+  private async onInteraction(interaction: Interaction): Promise<void> {
+    if (interaction.isButton()) {
+      if (interaction.customId.startsWith('ban-game-')) {
+        this.banGame(interaction as ButtonInteraction);
+      }
+    }
+  }
+
+  /**
+   * Bans a game from the game list
+   * 
+   * @param interaction Interaction containing the ID of the game to ban
+   */
+  private async banGame(interaction: ButtonInteraction): Promise<void> {
+    const applicationId = interaction.customId.replace(/ban-game-/g,'');
+
+    await Game.updateOne({ applicationId: applicationId }, { banned: true });
+    interaction.update({ content: `Game with applicationId ${applicationId} was banned`, components: [] });
   }
 
   // private fetchMessage() {
@@ -173,7 +194,7 @@ export class GamesRolesModule extends BotModule {
 
 
     // if(params['roleChannelId']) {
-    //   throw new error("Incorrect parameters");
+    //   throw new error('Incorrect parameters');
     // }
 
     // this.channelId = params['roleChannelId'] ? params['roleChannelId'] : null;
@@ -188,7 +209,7 @@ export class GamesRolesModule extends BotModule {
    * Retrieves game list from MongoDB
    * @returns Game list retrieved from MongoDB
    */
-  private retrieveGames(): Game[] {
+  private retrieveGames(): IGame[] {
 
     // Get by
 
