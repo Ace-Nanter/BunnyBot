@@ -1,23 +1,17 @@
-import { error } from "console";
-import { Guild } from "discord.js";
+import { Guild, Snowflake } from "discord.js";
+import { Bot } from "../../bot";
 import { Logger } from "../../logger/logger";
 import { BotModule } from "../../models/bot-module.model";
 import { Game } from "./models/game.model";
+import { ActivityScanner } from "./services/activity-scanner.service";
 
 export class GamesRolesModule extends BotModule {
 
-  private channelId: string;
-
-  private gamesTable: Game[];
-  private fetchTimer: any;
-  private scanTimer: any;
+  private activityScanner: ActivityScanner;
   private guild: Guild;
 
-  private static instance: GamesRolesModule;
-
-
   protected initCallbacks(): void {
-//this.callbacks.set('guildMemberAdd', GamesRolesModule.onGuildMemberAdd);
+    //this.callbacks.set('guildMemberAdd', GamesRolesModule.onGuildMemberAdd);
   }
 
   protected initCommands(): void {
@@ -25,31 +19,40 @@ export class GamesRolesModule extends BotModule {
   }
 
   protected async initModule(params?: any[]): Promise<void> {
-    if (params) {
+
+    try {
+      this.guild = await Bot.getClient().guilds.fetch(this.guildId);
+
+      this.activityScanner = new ActivityScanner(this.guild);
+      this.activityScanner.start();
+    } catch (error) {
+      Logger.error(error);
+    }    
+
+  //   if (params) {
       
 
-      try {
-        this.getAndCheckParams(params);
-        this.retrieveGames();
-  /*
-        for each games
-        this.initChannel();
-        this.initEmoji();
-        this.initRole();
+  //     try {
+  //       this.getAndCheckParams(params);
+  //       this.retrieveGames();
+  // /*
+  //       for each games
+  //       this.initChannel();
+  //       this.initEmoji();
+  //       this.initRole();
   
-  */
-        // this.writeGameList();
-        // this.startScanning();
-      }
-      catch(e) {
-        Logger.error(e);
-      }
+  // */
+  //       // this.writeGameList();
+  //       // this.startScanning();
+  //     }
+  //     catch(e) {
+  //       Logger.error(e);
+  //     }
 
 
 
-    }
+  //   }
 
-    GamesRolesModule.instance = this;
   }
 
   // private fetchMessage() {
@@ -166,11 +169,14 @@ export class GamesRolesModule extends BotModule {
    * @param params Parameters given
    */
   private getAndCheckParams(params: any[]): void {
-    if(!params['guildId'] || params['roleChannelId']) {
-      throw new error("Incorrect parameters");
-    }
 
-    this.channelId = params['roleChannelId'] ? params['roleChannelId'] : null;
+
+
+    // if(params['roleChannelId']) {
+    //   throw new error("Incorrect parameters");
+    // }
+
+    // this.channelId = params['roleChannelId'] ? params['roleChannelId'] : null;
     
     // GamesRolesModule.fetchFrequency = params['fetchingFrequency'] ? params['fetchingFrequency'] : 30000;
     // GamesRolesModule.scanFrequency = params['fetchingFrequency'] ? params['scanFrequency'] : 60000;
@@ -190,8 +196,8 @@ export class GamesRolesModule extends BotModule {
     return null;
   }
 
-  private stop() {
-    clearInterval(this.fetchTimer);
-    clearInterval(this.scanTimer);
-  }
+  // private stop() {
+  //   clearInterval(this.fetchTimer);
+  //   clearInterval(this.scanTimer);
+  // }
 }

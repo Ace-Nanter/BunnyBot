@@ -1,19 +1,25 @@
+import { Snowflake } from 'discord.js';
 import { Schema, model } from 'mongoose';
+import { IEmoji } from './models/emoji.model';
+import { IRole } from './models/role.model';
 
-export interface IGame {
-  roleId: string;
-  emojiId: string;
-  emojiName: string;
+export interface IGame extends Document {
+  applicationId: string;
   gameName: string;
-  activityId: string;
+  enabled: boolean;
+  role: IRole;
+  channelId: Snowflake;
+  emoji: IEmoji;        // Mongo external key  
 }
 
 const GameSchema = new Schema<IGame>({
-  roleId: String,
-  emojiId: String,
-  emojiName: String,
-  gameName: String,
-  activityId: String,
+  applicationId: { type: String, required: true },
+  gameName: { type: String, required: true },
+  enabled: { type: Boolean, required: true },
+  role: { type: Schema.Types.ObjectId, ref: 'roles', required: false },
+  channelId: { type: String, required: false },
+  emoji: { type: Schema.Types.ObjectId, ref: 'emojis' },
+
 }, { collection: 'games' });
 
 export const Game = model<IGame>('games', GameSchema);
