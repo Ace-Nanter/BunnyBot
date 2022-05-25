@@ -20,6 +20,7 @@ export class SpyModule extends BotModule {
     if(params && params['targetGuild'] && params['spiedGuild']) {
       this.targetGuild = await Bot.getClient().guilds.fetch(params['targetGuild']);
       this.spiedGuild = await Bot.getClient().guilds.fetch(params['spiedGuild']);
+      
       await Bot.getClient().channels.fetch(params['categoryId']).then(channel => {
         if (channel && channel instanceof CategoryChannel) {
           this.category = (channel as CategoryChannel);

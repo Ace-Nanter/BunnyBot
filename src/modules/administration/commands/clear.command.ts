@@ -29,12 +29,12 @@ export default class ClearCommand extends Command {
     await (interaction.channel as TextChannel).bulkDelete(count, true)
     .then(() => {
       interaction.reply({ content: `Successfully deleted \`${count}\` messages.` });
-      setTimeout(() => { interaction.deleteReply(); }, 10000);
+      setTimeout(() => { interaction.deleteReply(); }, 5000);
     })
     .catch(error => {
 			Logger.error(error);
 			interaction.reply({ content: 'There was an error trying to prune messages in this channel!' });
-      setTimeout(() => { interaction.deleteReply(); }, 10000);
+      setTimeout(() => { interaction.deleteReply(); }, 5000);
 		});
   }
 }
