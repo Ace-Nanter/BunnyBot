@@ -1,15 +1,26 @@
-import { ButtonInteraction, Guild, Interaction } from 'discord.js';
+import { ButtonInteraction, CategoryChannel, Guild, Interaction, ModalSubmitInteraction, SelectMenuInteraction } from 'discord.js';
 import { Bot } from '../../bot';
 import { Logger } from '../../logger/logger';
 import { BotModule } from '../../models/bot-module.model';
 import { default as GamesRolesCommand } from './commands/game.command-group';
+import { MessageHelper } from './helpers/message.helper';
 import { Game, IGame } from './models/game.model';
 import { ActivityScanner } from './services/activity-scanner.service';
+import { GameManager } from './services/game-manager.service';
+import { RoleManager } from './services/role-manager.service';
+
+const GAME_CATEGORY_CHANNEL_ID = 'gameCategoryChannelId';
+const ARCHIVE_CATEGORY_CHANNEL_ID = 'archiveCategoryChannelId';
 
 export class GamesRolesModule extends BotModule {
 
   private activityScanner: ActivityScanner;
+  private gameManager: GameManager;
+  private roleManager: RoleManager;
+
   private guild: Guild;
+  private gameCategory: CategoryChannel;
+  private archiveCategory: CategoryChannel;
 
   protected initCallbacks(): void {
     this.callbacks.set('interactionCreate', async (interaction: Interaction) => { this.onInteraction(interaction); })
@@ -19,48 +30,148 @@ export class GamesRolesModule extends BotModule {
     this.commands.push(new GamesRolesCommand(this));
   }
 
-  protected async initModule(params?: any[]): Promise<void> {
-
+  protected async initModule(params: any[]): Promise<void> {
     try {
       this.guild = await Bot.getClient().guilds.fetch(this.guildId);
 
+      await this.initParams(params);
+
+      this.gameManager = new GameManager(this.guild, this.gameCategory, this.archiveCategory);
+      this.roleManager = new RoleManager(this.guild);
       this.activityScanner = new ActivityScanner(this.guild);
       this.activityScanner.start();
     } catch (error) {
       Logger.error(error);
     }    
-
-  //   if (params) {
-      
-
-  //     try {
-  //       this.getAndCheckParams(params);
-  //       this.retrieveGames();
-  // /*
-  //       for each games
-  //       this.initChannel();
-  //       this.initEmoji();
-  //       this.initRole();
-  
-  // */
-  //       // this.writeGameList();
-  //       // this.startScanning();
-  //     }
-  //     catch(e) {
-  //       Logger.error(e);
-  //     }
-
-
-
-  //   }
-
   }
 
-  private async onInteraction(interaction: Interaction): Promise<void> {
-    if (interaction.isButton()) {
-      if (interaction.customId.startsWith('ban-game-')) {
-        this.banGame(interaction as ButtonInteraction);
+  public get archiveCategoryChannel(): CategoryChannel {
+    return this.archiveCategory;
+  }
+
+  private async initParams(params: any[]): Promise<void> {
+    if (params[GAME_CATEGORY_CHANNEL_ID]) {
+      const gameCategory = await Bot.getClient().channels.fetch(params[GAME_CATEGORY_CHANNEL_ID])
+      if (gameCategory && gameCategory instanceof CategoryChannel) {
+        this.gameCategory = (gameCategory as CategoryChannel);
       }
+    } else {
+      Logger.error('Error: no parameter found referencing game category channel');
+    }
+
+    if (params[ARCHIVE_CATEGORY_CHANNEL_ID]) {
+      const archiveCategory = await Bot.getClient().channels.fetch(params[ARCHIVE_CATEGORY_CHANNEL_ID])
+      if (archiveCategory && archiveCategory instanceof CategoryChannel) {
+        this.archiveCategory = (archiveCategory as CategoryChannel);
+      }
+    } else {
+      Logger.warn('Error: no parameter found referencing archive category channel');
+    }
+  }
+
+  private onInteraction(interaction: Interaction): void {
+    if (interaction.isButton()) {
+      this.manageButtonInteraction(interaction as ButtonInteraction); 
+    }
+    
+    if (interaction.isSelectMenu()) {
+      this.manageSelectMenuInteractions(interaction as SelectMenuInteraction);
+    }
+
+    if (interaction.isModalSubmit()) {
+      this.manageModalSubmitInteractions(interaction as ModalSubmitInteraction);
+    }
+  }
+
+  private async manageButtonInteraction(interaction: ButtonInteraction) {
+    if (!interaction.customId.startsWith('games-roles-')) {
+      return ;
+    }
+    
+    if (interaction.customId.includes('ban-game-')) {
+      this.banGame(interaction);
+    }
+
+    switch(interaction.customId.replace('games-roles-', '')) {
+      case 'create':
+        MessageHelper.sendCreateGameModal(interaction);
+        break;
+      case 'activate':
+        MessageHelper.sendActivateSelectMenu(interaction);
+        break;
+      case 'deactivate':
+        MessageHelper.sendDeactivateSelectMenu(interaction);
+        break;
+      case 'archive':
+        MessageHelper.sendArchiveSelectMenu(interaction);
+        break;
+      case 'unarchive':
+        MessageHelper.sendUnArchiveSelectMenu(interaction);
+        break;
+      case 'send-message':
+        MessageHelper.sendSendMessageModal(interaction);
+        break;
+      case 'join':
+        await MessageHelper.sendGameSelectionMenu(interaction);
+        break;
+      default:
+        Logger.error(`Unknown button interaction! CustomId: ${interaction.customId}`);
+        interaction.reply({ content: 'Unknown button interaction!', ephemeral: true });
+    }
+  }
+
+  /**
+   * Manage select menu interactions
+   * 
+   * @param interaction Interaction received
+   */
+  private manageSelectMenuInteractions(interaction: SelectMenuInteraction) {
+    if (!interaction.customId.startsWith('games-roles-')) {
+      return ;
+    }
+
+    switch(interaction.customId.replace('games-roles-', '')) {
+      case 'activate':
+        this.gameManager.activateGame(interaction);
+        break;
+      case 'deactivate':
+        this.gameManager.deactivateGame(interaction);
+        break;
+      case 'archive':
+        this.gameManager.archiveGame(interaction);
+        break;
+      case 'unarchive':
+        this.gameManager.unarchiveGame(interaction);
+        break;
+      case 'join-selected':
+        this.roleManager.manageSelectMenuInteraction(interaction);
+        break;
+      
+      default:
+        Logger.error(`Unknown select menu interaction! CustomId: ${interaction.customId}`);
+        interaction.reply({ content: 'Unknown select menu interaction!', ephemeral: true });
+    }
+  }
+
+  /**
+   * Manage select menu interactions 
+   * 
+   * @param interaction Interaction received
+   */
+   private manageModalSubmitInteractions(interaction: ModalSubmitInteraction) {
+    if (!interaction.customId.startsWith('games-roles-')) {
+      return ;
+    }
+
+    switch(interaction.customId.replace('games-roles-', '')) {
+      case 'send-message':
+        MessageHelper.sendJoinMessage(interaction);
+        break;
+      case 'create-game':
+        this.gameManager.createGame(interaction);
+        break;
+      default:
+        Logger.error(`Unknown modal interaction! CustomId: ${interaction.customId}`);
     }
   }
 
@@ -184,26 +295,6 @@ export class GamesRolesModule extends BotModule {
   //     GamesRolesModule.instance.scanPlayer(member);
   //   }
   // }
-
-  /**
-   * Retrieves and check parameters given to module's instance
-   * @param params Parameters given
-   */
-  private getAndCheckParams(params: any[]): void {
-
-
-
-    // if(params['roleChannelId']) {
-    //   throw new error('Incorrect parameters');
-    // }
-
-    // this.channelId = params['roleChannelId'] ? params['roleChannelId'] : null;
-    
-    // GamesRolesModule.fetchFrequency = params['fetchingFrequency'] ? params['fetchingFrequency'] : 30000;
-    // GamesRolesModule.scanFrequency = params['fetchingFrequency'] ? params['scanFrequency'] : 60000;
-
-    // TODO : check parameters for scanning? 
-  }
 
   /**
    * Retrieves game list from MongoDB

@@ -2,28 +2,30 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { Command } from '../../../models/command.model';
 import { GamesRolesModule } from '../games-roles.module';
-import { default as ActivateGameCommand } from './enable-game.command';
+import { default as GamesRolesAdminCommand } from './games-roles-admin.command';
+import { default as JoinGameCommand } from './join-game.command';
 
 export default class GamesRolesCommand extends Command {
   name = 'games-roles';
   visible = true;
   description = 'Every commands managing roles for games';
 
-  private activateCommand = new ActivateGameCommand(this.gamesRolesModule);
-  private archiveCommand = new ActivateGameCommand(this.gamesRolesModule);
+  private joinCommand = new JoinGameCommand(this.gamesRolesModule);
+  private adminCommand = new GamesRolesAdminCommand(this.gamesRolesModule);
   
   slashCommand = new SlashCommandBuilder()
     .setName(this.name)
     .setDescription(this.description)
-    .addSubcommand(this.activateCommand.slashCommand)
+    .addSubcommand(this.joinCommand.slashCommand)
+    .addSubcommand(this.adminCommand.slashCommand);
   
   execution = async (interaction: CommandInteraction): Promise<void> => {
     switch (interaction.options.getSubcommand()) {
-      case 'activate':
-        this.activateCommand.execution(interaction);
+      case 'join':
+        this.joinCommand.execution(interaction);
         break;
-      case 'archive':
-        this.archiveCommand.execution(interaction);
+      case 'admin':
+        this.adminCommand.execution(interaction);
         break;
     }
   };

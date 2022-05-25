@@ -69,13 +69,13 @@ export class ActivityScanner {
    */
   private async assignGame(member: GuildMember, game: IGame): Promise<void> {
     const guildGame: IGuildGame = game.guildGames.find(guildGame => guildGame.guildId === member.guild.id);
-    if (!guildGame || !guildGame.role) {
+    if (!guildGame || !guildGame.roleId) {
       return Promise.resolve();
     }
 
-    const role = await this.guild.roles.fetch(guildGame.role.id);
+    const role = await this.guild.roles.fetch(guildGame.roleId);
     if (!role) {
-      Logger.warn(`Error: role ${guildGame.role.id} does not exist in guild ${this.guild.name}`);
+      Logger.warn(`Error: role ${guildGame.roleId} does not exist in guild ${this.guild.name}`);
       return Promise.resolve();
     }
 
@@ -99,7 +99,7 @@ export class ActivityScanner {
     const row = new MessageActionRow().addComponents(
       new MessageButton()
         .setLabel('Ban')
-        .setCustomId(`ban-game-${activity.applicationId}`)
+        .setCustomId(`games-roles-ban-game-${activity.applicationId}`)
         .setStyle('DANGER')
     )
 

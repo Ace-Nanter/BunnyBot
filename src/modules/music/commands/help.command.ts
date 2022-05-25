@@ -22,7 +22,10 @@ export default class StopCommand extends Command {
    */
   public sendHelpMessage(interaction: CommandInteraction): MessageEmbed {
     const embed: MessageEmbed = new MessageEmbed()
-      .setAuthor(interaction.guild.me.displayName, interaction.guild.me.displayAvatarURL())
+      .setAuthor({
+        name: interaction.guild.me.displayName,
+        iconURL: interaction.guild.me.displayAvatarURL()
+      })
       .setTitle('Music player - Help')
       .addField('Play a song or add a new song to the queue',
         'Play a song or add it to the queue by typing the command `music play` followed by an url or a search text.\nYou have to be in a voice channel.'
