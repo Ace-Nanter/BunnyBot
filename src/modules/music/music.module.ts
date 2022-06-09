@@ -1,6 +1,6 @@
 import { getVoiceConnection } from '@discordjs/voice';
-import { ButtonInteraction, Interaction, SelectMenuInteraction, VoiceState } from 'discord.js';
-import { BotModule } from '../../models/modules/bot-module.model';
+import { ButtonInteraction, Interaction, SelectMenuInteraction, Snowflake, VoiceState } from 'discord.js';
+import { BotModule } from '../../models/bot-module.model';
 import { default as MusicCommandClass } from './commands/music.command';
 import { GuildMusic } from './models/guild-music.model';
 
@@ -10,21 +10,26 @@ export class MusicModule extends BotModule {
 
   guildMusicMap: Map<string, GuildMusic>;
 
-  constructor() {
-    super();
-
-    this.callbacks = new Map();
-
-    this.commands = [];
-    this.commands.push(new MusicCommandClass(this));
+  constructor(guildId?: Snowflake) {
+    super(guildId);
 
     this.guildMusicMap = new Map();
-    this.callbacks.set('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => { this.onVoiceChannelUpdate(oldState, newState); });
-    this.callbacks.set('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => { this.onVoiceChannelUpdate(oldState, newState); });
-    this.callbacks.set('interaction', async (interaction: Interaction) => { this.onInteraction(interaction); })
   }
 
-  private async onInteraction(interaction: Interaction) {
+  protected initCommands(): void {
+    this.commands.push(new MusicCommandClass(this));
+  }
+
+  protected initCallbacks(): void {
+    this.callbacks.set('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => { this.onVoiceChannelUpdate(oldState, newState); });
+    this.callbacks.set('interactionCreate', async (interaction: Interaction) => { this.onInteraction(interaction); })
+  }
+
+  protected initModule(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  protected async onInteraction(interaction: Interaction): Promise<void> {
     if (interaction.isButton()) {
       switch (interaction.customId) {
         case 'music-rewind':
@@ -49,8 +54,6 @@ export class MusicModule extends BotModule {
     }
     else if (interaction.isSelectMenu() && interaction.customId === 'music-delete-menu') {
       this.onDeleteMenu(interaction);
-      console.log(interaction);
-      // TODO : to complete
     }
   }
 
