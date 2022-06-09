@@ -1,9 +1,9 @@
-import { Guild, MessageReaction, TextChannel, User, GuildMember, Message } from "discord.js";
-import { Bot } from "../bot";
-import { Dao } from "../dao/dao";
-import { Logger } from "../logger/logger";
-import { Game } from "../models/game.model";
-import { BotModule } from "../models/modules/bot-module.model";
+import { Guild, GuildMember, Message, MessageReaction, TextChannel, User } from "discord.js";
+import { Bot } from "../../bot";
+import { Logger } from "../../logger/logger";
+import { BotModule } from "../../models/bot-module.model";
+import { Game, IGame } from "./game.model";
+
 export class GamesRolesModule extends BotModule {
 
   private static targetChannelID: string;
@@ -11,27 +11,42 @@ export class GamesRolesModule extends BotModule {
   private static fetchFrequency: number;
   private static scanFrequency: number;
 
-  private gamesTable: Game[];
+  private gamesTable: IGame[];
   private fetchTimer: any;
   private scanTimer: any;
   private guild: Guild;
 
   private static instance: GamesRolesModule;
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  constructor(params: any) {
-    super();
-
-    this.callbacks = new Map();
+  protected initCallbacks(): void {
     this.callbacks.set('messageReactionAdd', GamesRolesModule.onMessageReactionAdd);
     this.callbacks.set('messageReactionRemove', GamesRolesModule.onMessageReactionRemove);
     this.callbacks.set('guildMemberAdd', GamesRolesModule.onGuildMemberAdd);
+  }
 
-    if (params) {
-      this.init(params);
-    }
+  public async initModule(params: any[]): Promise<void> {
+    if (!params) return ;
+
+    GamesRolesModule.targetChannelID = params['targetChannel'] ? params['targetChannel'] : null;
+    GamesRolesModule.targetMessageID = params['targetMessage'] ? params['targetMessage'] : null;
+    GamesRolesModule.fetchFrequency = params['fetchingFrequency'] ? params['fetchingFrequency'] : 30000;
+    GamesRolesModule.scanFrequency = params['fetchingFrequency'] ? params['scanFrequency'] : 60000;
+
+    this.fetchMessage();
+    this.fetchTimer = setInterval(() => { this.fetchMessage(); }, GamesRolesModule.fetchFrequency);
+
+    Game.find({}).then((gameList: IGame[]) => {
+      this.gamesTable = gameList;
+      this.scanTimer = setInterval(() => { this.scanPlayersActivity(); }, GamesRolesModule.scanFrequency);
+    }).catch(e => {
+      Logger.error(`Unable to retrieve games table! ${e}`);
+    });
 
     GamesRolesModule.instance = this;
+  }
+
+  protected initCommands(): void {
+    return ;
   }
 
   private fetchMessage() {
@@ -141,23 +156,6 @@ export class GamesRolesModule extends BotModule {
     if (member.user.id !== Bot.getId() && GamesRolesModule.instance) {
       GamesRolesModule.instance.scanPlayer(member);
     }
-  }
-
-  private init(params: any[]) {
-    GamesRolesModule.targetChannelID = params['targetChannel'] ? params['targetChannel'] : null;
-    GamesRolesModule.targetMessageID = params['targetMessage'] ? params['targetMessage'] : null;
-    GamesRolesModule.fetchFrequency = params['fetchingFrequency'] ? params['fetchingFrequency'] : 30000;
-    GamesRolesModule.scanFrequency = params['fetchingFrequency'] ? params['scanFrequency'] : 60000;
-
-    this.fetchMessage();
-    this.fetchTimer = setInterval(() => { this.fetchMessage(); }, GamesRolesModule.fetchFrequency);
-
-    Dao.getInstance().getGameList().then(gameList => {
-      this.gamesTable = gameList;
-      this.scanTimer = setInterval(() => { this.scanPlayersActivity(); }, GamesRolesModule.scanFrequency);
-    }).catch(e => {
-      Logger.error(`Unable to retrieve games table! ${e}`);
-    });
   }
 
   private stop() {

@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, Guild, GuildMember, Message, MessageEmbed, StageChannel, VoiceChannel } from 'discord.js';
 import { Bot } from '../../../bot';
-import { Command } from '../../../models/modules/command.model';
+import { Command } from '../../../models/command.model';
 import { EmbedHelper } from '../../../utils/embed.helper';
 import { GuildMusic } from '../models/guild-music.model';
 import { Song } from '../models/song.model';

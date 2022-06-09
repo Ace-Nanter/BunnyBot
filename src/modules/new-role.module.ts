@@ -1,7 +1,7 @@
 import { GuildMember, MessageReaction, Role, Message, Guild, TextChannel, User, Snowflake } from "discord.js";
 import { Bot } from "../bot";
 import { Logger } from "../logger/logger";
-import { BotModule } from "../models/modules/bot-module.model";
+import { BotModule } from "../models/bot-module.model";
 
 const ROLE_ID = 'roleId';
 const REACTION_NAME = 'reactionName';
@@ -16,19 +16,17 @@ export class NewRoleModule extends BotModule {
   private static message: Message;
   private static reactionName: string;
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  constructor(params: any) {
-    super();
-
-    this.init(params);
-
-    this.callbacks = new Map();
+  protected initCallbacks(): void {
     this.callbacks.set('guildMemberAdd', NewRoleModule.onGuildMemberAdd);
     this.callbacks.set('messageReactionAdd', NewRoleModule.onMessageReactionAdded);
     this.callbacks.set('messageReactionRemove', NewRoleModule.onMessageReactionRemoved);
   }
 
-  private async init(params: any) {
+  protected initCommands(): void {
+    return ;
+  }
+
+  public async initModule(params: any[]): Promise<void> {
     if (params) {
 
       let guild: Guild = null;

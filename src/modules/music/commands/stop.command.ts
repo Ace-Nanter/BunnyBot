@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { getVoiceConnection } from '@discordjs/voice';
 import { CommandInteraction } from 'discord.js';
-import { Command } from '../../../models/modules/command.model';
+import { Command } from '../../../models/command.model';
 import { MusicModule } from '../music.module';
 
 export default class StopCommand extends Command {
