@@ -6,10 +6,10 @@ import { Game, IGame } from '../models/game.model';
 import { IGuildGame } from '../models/guild-game.model';
 
 
-export default class GamesRolesAdminCommand extends Command {
-  name = 'admin';
+export default class AdminGamesRolesCommand extends Command {
+  name = 'admin-games-roles';
   visible = true;
-  description = 'Displays admin commands';
+  description = 'Displays admin commands for games roles';
 
   slashCommand = new SlashCommandSubcommandBuilder()
     .setName(this.name)
