@@ -1,15 +1,13 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, GuildMember, MessageActionRow, MessageSelectMenu, MessageSelectOptionData } from 'discord.js';
-import { Logger } from '../../../logger/logger';
+import { CommandInteraction } from 'discord.js';
 import { Command } from '../../../models/command.model';
 import { MessageHelper } from '../helpers/message.helper';
-import { Game, IGame } from '../models/game.model';
 
 
-export default class JoinGameCommand extends Command {
-  name = 'join';
+export default class GamesRolesCommand extends Command {
+  name = 'games-roles';
   visible = true;
-  description = 'Join a game';
+  description = 'Select your games roles';
 
   slashCommand = new SlashCommandSubcommandBuilder()
     .setName(this.name)
@@ -19,6 +17,5 @@ export default class JoinGameCommand extends Command {
     await interaction.deferReply({ ephemeral: true });
     MessageHelper.sendGameSelectionMenu(interaction);
   };
-
   
 }

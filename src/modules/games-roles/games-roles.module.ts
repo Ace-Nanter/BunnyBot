@@ -1,13 +1,13 @@
-import { ButtonInteraction, CategoryChannel, Guild, Interaction, ModalSubmitInteraction, SelectMenuInteraction } from 'discord.js';
+import { ButtonInteraction, CategoryChannel, Guild, GuildMember, Interaction, MessageFlags, ModalSubmitInteraction, SelectMenuInteraction } from 'discord.js';
 import { Bot } from '../../bot';
 import { Logger } from '../../logger/logger';
 import { BotModule } from '../../models/bot-module.model';
-import { default as GamesRolesCommand } from './commands/game.command-group';
+import { default as GamesRolesCommand } from './commands/games-roles.command';
+import { default as AdminGamesRolesCommand } from './commands/admin-games-roles.command';
 import { MessageHelper } from './helpers/message.helper';
 import { Game, IGame } from './models/game.model';
 import { ActivityScanner } from './services/activity-scanner.service';
 import { GameManager } from './services/game-manager.service';
-import { RoleManager } from './services/role-manager.service';
 
 const GAME_CATEGORY_CHANNEL_ID = 'gameCategoryChannelId';
 const ARCHIVE_CATEGORY_CHANNEL_ID = 'archiveCategoryChannelId';
@@ -16,7 +16,6 @@ export class GamesRolesModule extends BotModule {
 
   private activityScanner: ActivityScanner;
   private gameManager: GameManager;
-  private roleManager: RoleManager;
 
   private guild: Guild;
   private gameCategory: CategoryChannel;
@@ -24,10 +23,12 @@ export class GamesRolesModule extends BotModule {
 
   protected initCallbacks(): void {
     this.callbacks.set('interactionCreate', async (interaction: Interaction) => { this.onInteraction(interaction); })
+    this.callbacks.set('guildMemberAdd', async (guildMember: GuildMember) => { this.onNewGuildMember(guildMember); })
   }
 
   protected initCommands(): void {
     this.commands.push(new GamesRolesCommand(this));
+    this.commands.push(new AdminGamesRolesCommand(this));
   }
 
   protected async initModule(params: any[]): Promise<void> {
@@ -37,7 +38,6 @@ export class GamesRolesModule extends BotModule {
       await this.initParams(params);
 
       this.gameManager = new GameManager(this.guild, this.gameCategory, this.archiveCategory);
-      this.roleManager = new RoleManager(this.guild);
       this.activityScanner = new ActivityScanner(this.guild);
       this.activityScanner.start();
     } catch (error) {
@@ -144,7 +144,7 @@ export class GamesRolesModule extends BotModule {
         this.gameManager.unarchiveGame(interaction);
         break;
       case 'join-selected':
-        this.roleManager.manageSelectMenuInteraction(interaction);
+        this.manageJoinInteraction(interaction);
         break;
       
       default:
@@ -176,6 +176,50 @@ export class GamesRolesModule extends BotModule {
   }
 
   /**
+   * Manage interaction happening when a user selected its roles in the join select menu
+   * 
+   * @param interaction Interaction received containing selected roles 
+   * @returns Nothing
+   */
+  private async manageJoinInteraction(interaction: SelectMenuInteraction): Promise<void> {
+    await interaction.deferUpdate();
+
+    if (!interaction.values) return ;
+
+    const member: GuildMember = await this.guild.members.fetch(interaction.member.user.id);
+    const games = await Game.getGamesWithRolesForGuild(interaction.guildId);
+
+    await Promise.all(games.map(async (game: IGame) => {
+      try {
+        await this.manageInteractionForGame(interaction, game, member);
+      } catch (error) {
+        Logger.warn(error);
+      }
+    }));
+
+    const message = await interaction.editReply({ content: 'Roles updated!', components: []});
+    if (message.flags != MessageFlags.FLAGS.EPHEMERAL) {
+      setTimeout(() => { interaction.deleteReply(); }, 5000);
+    }
+  }
+
+  private async manageInteractionForGame(interaction: SelectMenuInteraction, game: IGame, member: GuildMember) {
+
+    // Get guildGame
+    const guildGame = game.guildGames.find(g => g.guildId === interaction.guildId);
+
+    if (!guildGame || !guildGame.roleId) {
+      throw `An error occurred for game with applicationId ${game.applicationId} in guild ${interaction.guildId}`;
+    }
+
+    if (interaction.values.includes(game.applicationId)) {
+      await member.roles.add(guildGame.roleId);
+    } else {
+      await member.roles.remove(guildGame.roleId);
+    }
+  }
+
+  /**
    * Bans a game from the game list
    * 
    * @param interaction Interaction containing the ID of the game to ban
@@ -187,129 +231,9 @@ export class GamesRolesModule extends BotModule {
     interaction.update({ content: `Game with applicationId ${applicationId} was banned`, components: [] });
   }
 
-  // private fetchMessage() {
-  //   Bot.getClient().channels.fetch(GamesRolesModule.targetChannelID).then(c => {
-  //     const channel = c as TextChannel;
-  //     this.guild = channel.guild;             // Helps scan process
-  //     channel.messages.fetch(GamesRolesModule.targetMessageID).then(message => {
-  //       this.addReaction(message);
-  //     }).catch(e => Logger.warn(`Games-Roles Module: Unable to find target message! ${e}`));
-  //   });
-  // }
-
-  // private scanPlayersActivity() {
-  //   this.guild.members.fetch().then(members => {
-  //     members.forEach(member => {
-  //       this.scanPlayer(member);
-  //     });
-  //   });
-  // }
-
-  // private scanPlayer(member: GuildMember) {
-  //   if (member.presence && member.presence.status !== 'offline') {
-  //     const activity = member.presence.activities.find(a => a.applicationId);
-  //     if (activity) {
-  //       const game = this.gamesTable.find(g => g.activityId === activity.applicationId);
-  //       if (game) {
-  //         this.guild.roles.fetch(game.roleId).then(role => {
-  //           if (!member.roles.cache.has(role.id)) {
-  //             member.roles.add(role);
-  //             Logger.log(`Added role ${role.name} to ${member.user.username}!`);
-  //           }
-  //         }).catch(e => Logger.error(`Unable to find role associated to game ${game.gameName}: ${e}`));
-  //       }
-  //     }
-  //   }
-  // }
-
-  // private addReaction(message: Message) {
-  //   if (this.gamesTable && this.gamesTable.length > 0) {
-  //     this.gamesTable.sort((g1, g2) => {
-  //       if (g1.gameName < g2.gameName) { return -1; }
-  //       if (g1.gameName > g2.gameName) { return 1; }
-  //       return 0;
-  //     }).forEach(game => {
-  //       const reaction = message.reactions.cache.find(r => r.emoji.name === game.emojiName && r.me);
-  //       if (!reaction) {
-  //         const emoji = this.guild.emojis.cache.find(e => e.name === game.emojiName);
-  //         if (emoji) {
-  //           message.react(emoji);
-  //         }
-  //       }
-  //     });
-  //   }
-  // }
-
-  // private static async onMessageReactionAdd(messageReaction: MessageReaction, user: User) {
-
-  //   const clientId = Bot.getId();
-
-  //   if (user.id !== clientId && messageReaction.message.id === GamesRolesModule.targetMessageID
-  //     && GamesRolesModule.instance && GamesRolesModule.instance.gamesTable) {
-  //     const game = GamesRolesModule.instance.gamesTable.find(g => g.emojiName === messageReaction.emoji.name);
-  //     if (game) {
-  //       const member = await messageReaction.message.guild.members.fetch(user);
-
-  //       messageReaction.message.guild.roles.fetch(game.roleId).then(role => {
-  //         if (!member.roles.cache.has(game.roleId)) {
-  //           member.roles.add(role);
-  //           Logger.info(`Added role ${role.name} to ${user.username}`);
-  //           member.createDM().then(channel => {
-  //             channel.send(`Je t'ai ajouté le rôle **${role.name}**!`);
-  //           });
-  //         }
-  //       }).catch(() => {
-  //         Logger.warn(`Unable to find role associated to game ${game.gameName}`);
-  //       });
-  //     }
-  //   }
-  // }
-
-  // private static async onMessageReactionRemove(messageReaction: MessageReaction, user: User) {
-
-  //   const clientId = Bot.getId();
-
-  //   if (user.id !== clientId && messageReaction.message.id === GamesRolesModule.targetMessageID
-  //     && GamesRolesModule.instance && GamesRolesModule.instance.gamesTable) {
-  //     const game = GamesRolesModule.instance.gamesTable.find(g => g.emojiName === messageReaction.emoji.name);
-  //     if (game) {
-  //       const member = await messageReaction.message.guild.members.fetch(user);
-
-  //       messageReaction.message.guild.roles.fetch(game.roleId).then(role => {
-  //         if (member.roles.cache.has(game.roleId)) {
-  //           member.roles.remove(role);
-  //           Logger.info(`Removed role ${role.name} from ${user.username}`);
-  //           member.createDM().then(channel => {
-  //             channel.send(`Je t'ai enlevé le rôle **${role.name}**!`);
-  //           });
-  //         }
-  //       }).catch(() => {
-  //         Logger.warn(`Unable to find role associated to game ${game.gameName}`);
-  //       });
-  //     }
-  //   }
-  // }
-
-  // private static onGuildMemberAdd(member: GuildMember) {
-  //   if (member.user.id !== Bot.getId() && GamesRolesModule.instance) {
-  //     GamesRolesModule.instance.scanPlayer(member);
-  //   }
-  // }
-
-  /**
-   * Retrieves game list from MongoDB
-   * @returns Game list retrieved from MongoDB
-   */
-  private retrieveGames(): IGame[] {
-
-    // Get by
-
-
-    return null;
+  private onNewGuildMember(member: GuildMember) {
+    if (member.user.id !== Bot.getId()) {
+      this.activityScanner.scanGuildMember(member);
+    }
   }
-
-  // private stop() {
-  //   clearInterval(this.fetchTimer);
-  //   clearInterval(this.scanTimer);
-  // }
 }

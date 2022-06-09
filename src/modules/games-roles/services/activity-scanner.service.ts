@@ -19,18 +19,31 @@ export class ActivityScanner {
    * Starts activity scanning
    */
   public start(): void {
-    this.scanActivities();
-    this.scanInterval = setInterval(() => this.scanActivities(), ActivityScanner.SCAN_FREQUENCY);
+    this.scanAllGuildMembers();
+    this.scanInterval = setInterval(() => this.scanAllGuildMembers(), ActivityScanner.SCAN_FREQUENCY);
   }
 
-  public scanActivities(): void {
+  /**
+   * Scans every guild member's activities
+   */
+  public scanAllGuildMembers(): void {
     this.guild.members.fetch().then((members: Collection<string, GuildMember>) => {
       members.forEach((member: GuildMember) => {
-        if (member.presence && member.presence.activities && member.presence.activities.length > 0) {
-          member.presence.activities.forEach((activity: Activity) => this.manageMemberActivity(member, activity));
-        }
+        this.scanGuildMember(member);   
       })
     });
+  }
+
+  /**
+   * Scan a single guild member's activities
+   * 
+   * @param member Guild member to scan
+   * @returns Nothing
+   */
+  public async scanGuildMember(member: GuildMember): Promise<void> {
+    if (member.presence && member.presence.activities && member.presence.activities.length > 0) {
+      await member.presence.activities.forEach((activity: Activity) => this.manageMemberActivity(member, activity));
+    }
   }
 
   /**
@@ -38,7 +51,7 @@ export class ActivityScanner {
    * 
    * @param member Member for which activity should be managed
    * @param activity Activity to manage
-   * @returns A Promise
+   * @returns Nothing
    */
   private async manageMemberActivity(member: GuildMember, activity: Activity): Promise<void> {
     if (!activity.applicationId) return Promise.resolve();
@@ -53,10 +66,8 @@ export class ActivityScanner {
       }).save();
 
       this.createLogMessage(activity);
-
-      return Promise.resolve();
     } else {
-      return this.assignGame(member, game);
+      this.assignGame(member, game);
     }
   }
 
@@ -69,7 +80,7 @@ export class ActivityScanner {
    */
   private async assignGame(member: GuildMember, game: IGame): Promise<void> {
     const guildGame: IGuildGame = game.guildGames.find(guildGame => guildGame.guildId === member.guild.id);
-    if (!guildGame || !guildGame.roleId) {
+    if (!guildGame || !guildGame.roleId || guildGame.archived) {
       return Promise.resolve();
     }
 
@@ -84,6 +95,12 @@ export class ActivityScanner {
     return Promise.resolve();
   }
   
+  /**
+   * Creates a log message when a game is created with a ban button
+   * 
+   * @param activity Activity for which a game has been created
+   * @returns Nothing
+   */
   private async createLogMessage(activity: Activity): Promise<void> {
     if (!process.env.LOG_CHANNEL_ID) return ;
     

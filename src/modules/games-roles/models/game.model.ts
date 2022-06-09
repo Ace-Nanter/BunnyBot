@@ -19,7 +19,7 @@ export interface IGameModel extends Model<IGame> {
 }
 
 const GameSchema = new Schema<IGame>({
-  applicationId: { type: String, required: false },
+  applicationId: { type: String, required: true },
   gameName: { type: String, required: true },
   guildGames: { type: [GuildGameSchema], required: true },
   banned: { type: Boolean, required: false },
