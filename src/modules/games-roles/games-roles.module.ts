@@ -24,8 +24,12 @@ export class GamesRolesModule extends BotModule {
   private archiveCategory: CategoryChannel;
 
   protected initCallbacks(): void {
-    this.callbacks.set('interactionCreate', async (interaction: Interaction) => { this.onInteraction(interaction); })
-    this.callbacks.set('guildMemberAdd', async (guildMember: GuildMember) => { this.onNewGuildMember(guildMember); })
+    this.callbacks.set('interactionCreate', async (interaction: Interaction) => {
+      if (interaction.guildId === this.guildId) this.onInteraction(interaction);
+    });
+    this.callbacks.set('guildMemberAdd', async (guildMember: GuildMember) => {
+      if (guildMember.guild.id === this.guildId) this.onNewGuildMember(guildMember);
+    });
   }
 
   protected initCommands(): void {
