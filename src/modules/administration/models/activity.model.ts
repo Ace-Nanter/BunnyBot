@@ -9,7 +9,7 @@ export interface IActivityDocument extends Document {
 export const ActivityOptionsSchema = new Schema<ActivityOptions> ({
   name: { type: String, required: false },
   url: { type: String, required: false},
-  type: { type: String, required: true}
+  type: { type: Number, required: false}
 });
 
 export const ActivitySchema = new Schema<IActivityDocument> ({
