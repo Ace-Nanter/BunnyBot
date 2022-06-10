@@ -17,15 +17,14 @@ export class SpyModule extends BotModule {
   }
 
   public async initModule(params: any[]): Promise<void> {
-    if(params && params['targetGuild'] && params['spiedGuild']) {
+    if(params && params['targetGuild'] && params['spiedGuild'] && params['categoryId']) {
       this.targetGuild = await Bot.getClient().guilds.fetch(params['targetGuild']);
       this.spiedGuild = await Bot.getClient().guilds.fetch(params['spiedGuild']);
       
-      await Bot.getClient().channels.fetch(params['categoryId']).then(channel => {
-        if (channel && channel instanceof CategoryChannel) {
-          this.category = (channel as CategoryChannel);
-        }
-      });
+      const channel = await Bot.getClient().channels.fetch(params['categoryId']);
+      if (channel && channel instanceof CategoryChannel) {
+        this.category = (channel as CategoryChannel);
+      }
     }
   }
 
