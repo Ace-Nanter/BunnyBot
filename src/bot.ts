@@ -111,7 +111,7 @@ export class Bot {
           });
         }
       } catch (error) {
-        Logger.error(error);
+        Logger.warn(`Error while initializing module ${moduleConfig.moduleName}: ${error}`);
       }
     });
 

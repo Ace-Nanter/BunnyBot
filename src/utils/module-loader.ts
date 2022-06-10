@@ -7,23 +7,17 @@ export class ModuleLoader {
 
   public static async loadModule(config: IModuleConfig): Promise<BotModule> {
     if (config && config.enabled) {
-      try {
-        let module: BotModule = new (<any>ModuleIndex)[config.moduleName](config.guildId);
+      let module: BotModule = new (<any>ModuleIndex)[config.moduleName](config.guildId);
 
-        if (module == null || module == undefined) {
-          module = null;
-          Logger.error(`Unable to load module ${config.moduleName}`);
-          return Promise.reject();
-        }
-
-        await module.init(config.params);
-
-        return Promise.resolve(module);
-      }
-      catch (error) {
-        Logger.warn(`Module ${config.moduleName} not found! Error: ${error}`);
+      if (module == null || module == undefined) {
+        module = null;
+        Logger.error(`Unable to load module ${config.moduleName}`);
         return Promise.reject();
       }
+
+      await module.init(config.params);
+
+      return Promise.resolve(module);
     }
   }
 }
