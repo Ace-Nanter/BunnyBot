@@ -1,6 +1,5 @@
 import { Snowflake } from "discord.js";
 import { Schema } from 'mongoose';
-import { IEmoji } from "./emoji.model";
 
 export interface IGuildGame {
   guildId: Snowflake;
@@ -9,7 +8,6 @@ export interface IGuildGame {
   roleColor: number;
   channelId: Snowflake;
   archived: boolean;
-  emoji: IEmoji;
 }
 
 export const GuildGameSchema = new Schema<IGuildGame> ({
@@ -19,5 +17,4 @@ export const GuildGameSchema = new Schema<IGuildGame> ({
   roleColor: { type: Number, required: false },
   channelId: { type: String, required: false },
   archived: { type: Boolean, required: true },
-  emoji: { type: Schema.Types.ObjectId, ref: 'emojis', required: false },
 });

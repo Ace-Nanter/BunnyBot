@@ -91,6 +91,4 @@ GameSchema.static('getArchivedGamesForGuild', async (guildId: Snowflake): Promis
   });
 });
 
-
-
 export const Game: IGameModel = model<IGame, IGameModel>('games', GameSchema);

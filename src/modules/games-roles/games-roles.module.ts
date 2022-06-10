@@ -2,8 +2,8 @@ import { ButtonInteraction, CategoryChannel, Guild, GuildMember, Interaction, Me
 import { Bot } from '../../bot';
 import { Logger } from '../../logger/logger';
 import { BotModule } from '../../models/bot-module.model';
-import { default as GamesRolesCommand } from './commands/games-roles.command';
 import { default as AdminGamesRolesCommand } from './commands/admin-games-roles.command';
+import { default as GamesRolesCommand } from './commands/games-roles.command';
 import { MessageHelper } from './helpers/message.helper';
 import { Game, IGame } from './models/game.model';
 import { ActivityScanner } from './services/activity-scanner.service';
@@ -11,6 +11,7 @@ import { GameManager } from './services/game-manager.service';
 
 const GAME_CATEGORY_CHANNEL_ID = 'gameCategoryChannelId';
 const ARCHIVE_CATEGORY_CHANNEL_ID = 'archiveCategoryChannelId';
+const SCAN_FREQUENCY = 'scanFrequency'
 
 export class GamesRolesModule extends BotModule {
 
@@ -18,6 +19,7 @@ export class GamesRolesModule extends BotModule {
   private gameManager: GameManager;
 
   private guild: Guild;
+  private frequency: number;
   private gameCategory: CategoryChannel;
   private archiveCategory: CategoryChannel;
 
@@ -38,7 +40,7 @@ export class GamesRolesModule extends BotModule {
       await this.initParams(params);
 
       this.gameManager = new GameManager(this.guild, this.gameCategory, this.archiveCategory);
-      this.activityScanner = new ActivityScanner(this.guild);
+      this.activityScanner = new ActivityScanner(this.guild, this.frequency);
       this.activityScanner.start();
     } catch (error) {
       Logger.error(error);
@@ -67,6 +69,11 @@ export class GamesRolesModule extends BotModule {
     } else {
       Logger.warn('Error: no parameter found referencing archive category channel');
     }
+
+    if (params[SCAN_FREQUENCY]) {
+      const frequency = Number.parseInt(params[SCAN_FREQUENCY]);
+      this.frequency = frequency? frequency : 60000     // Default value = 1min
+    }
   }
 
   private onInteraction(interaction: Interaction): void {
@@ -83,7 +90,12 @@ export class GamesRolesModule extends BotModule {
     }
   }
 
-  private async manageButtonInteraction(interaction: ButtonInteraction) {
+  /**
+   * Manages buttons interactions 
+   * 
+   * @param interaction Button interaction received
+   */
+  private async manageButtonInteraction(interaction: ButtonInteraction): Promise<void> {
     if (!interaction.customId.startsWith('games-roles-')) {
       return ;
     }
@@ -125,7 +137,7 @@ export class GamesRolesModule extends BotModule {
    * 
    * @param interaction Interaction received
    */
-  private manageSelectMenuInteractions(interaction: SelectMenuInteraction) {
+  private manageSelectMenuInteractions(interaction: SelectMenuInteraction): Promise<void> {
     if (!interaction.customId.startsWith('games-roles-')) {
       return ;
     }
@@ -158,7 +170,7 @@ export class GamesRolesModule extends BotModule {
    * 
    * @param interaction Interaction received
    */
-   private manageModalSubmitInteractions(interaction: ModalSubmitInteraction) {
+   private manageModalSubmitInteractions(interaction: ModalSubmitInteraction): Promise<void> {
     if (!interaction.customId.startsWith('games-roles-')) {
       return ;
     }
