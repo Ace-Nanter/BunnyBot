@@ -3,7 +3,6 @@ import { CommandInteraction } from 'discord.js';
 import { Command } from '../../../models/command.model';
 import { MessageHelper } from '../helpers/message.helper';
 
-
 export default class GamesRolesCommand extends Command {
   name = 'games-roles';
   visible = true;
@@ -17,5 +16,4 @@ export default class GamesRolesCommand extends Command {
     await interaction.deferReply({ ephemeral: true });
     MessageHelper.sendGameSelectionMenu(interaction);
   };
-  
 }

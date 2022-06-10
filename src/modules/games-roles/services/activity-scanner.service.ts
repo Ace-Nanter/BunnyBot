@@ -6,13 +6,13 @@ import { IGuildGame } from '../models/guild-game.model';
 
 export class ActivityScanner {
 
-  private static readonly SCAN_FREQUENCY = 60000;   // Every minute
-
   private guild: Guild;
+  private frequency: number;
   private scanInterval: ReturnType<typeof setInterval>;
 
-  constructor(guild: Guild) {
+  constructor(guild: Guild, frequency: number) {
     this.guild = guild;
+    this.frequency = frequency;
   }
 
   /**
@@ -20,7 +20,7 @@ export class ActivityScanner {
    */
   public start(): void {
     this.scanAllGuildMembers();
-    this.scanInterval = setInterval(() => this.scanAllGuildMembers(), ActivityScanner.SCAN_FREQUENCY);
+    this.scanInterval = setInterval(() => this.scanAllGuildMembers(), this.frequency);
   }
 
   /**

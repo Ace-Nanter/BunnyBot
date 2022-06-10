@@ -37,8 +37,7 @@ export class GameManager {
       roleName: role.name,
       roleColor: null,
       channelId: (channel) ? channel.id : null,
-      archived: false,
-      emoji: null
+      archived: false
     });
     await game.save();
 
@@ -91,8 +90,7 @@ export class GameManager {
       roleName: role.name,
       roleColor: null,
       channelId: (channel) ? channel.id : null,
-      archived: false,
-      emoji: null
+      archived: false
     });
     game.save();
 
