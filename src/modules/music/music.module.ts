@@ -29,7 +29,7 @@ export class MusicModule extends BotModule {
     return Promise.resolve();
   }
 
-  protected async onInteraction(interaction: Interaction): Promise<void> {
+  private async onInteraction(interaction: Interaction): Promise<void> {
     if (interaction.isButton()) {
       switch (interaction.customId) {
         case 'music-rewind':
