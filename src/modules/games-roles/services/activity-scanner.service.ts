@@ -90,8 +90,12 @@ export class ActivityScanner {
       return Promise.resolve();
     }
 
-    member.roles.add(role);   // Add role to member
-    Logger.info(`Giving role ${role.name} to ${member.displayName}`);
+    // Add role if the member does not already have it
+    if (!member.roles.cache.has(role.id)) {
+      member.roles.add(role);
+      Logger.log(`Added role ${role.name} to ${member.displayName}!`);
+    }
+
     return Promise.resolve();
   }
   
