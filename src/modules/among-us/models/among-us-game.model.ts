@@ -1,5 +1,4 @@
 import { Logger } from './../../../logger/logger';
-import { exception } from 'console';
 import { PlayerUpdate } from './player-update.model';
 import { Snowflake } from "discord.js";
 import { Player } from "./player.model";
@@ -36,7 +35,7 @@ export class AmongUsGame {
 
     if(!player) {
       Logger.error('There is no player with such name!');
-      throw new exception('There is no player with such name!');
+      throw new Error('There is no player with such name!');
     }
 
     this.indexes.push(player.index);
