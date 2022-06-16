@@ -4,3 +4,4 @@ export { GamesRolesModule as GamesRolesModule } from './games-roles/games-roles.
 export { NewRoleModule as NewRoleModule } from './new-role.module';
 export { MusicModule as MusicModule } from './music/music.module';
 export { SpyModule as SpyModule } from './spy.module';
+export { StatsModule as StatsModule } from './stats/stats.module';
