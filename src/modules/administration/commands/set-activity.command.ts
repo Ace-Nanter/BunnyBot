@@ -20,7 +20,7 @@ export default class SetActivityCommand extends Command {
     option.setName('type')
       .setDescription('Type of activity')
       .setRequired(true)
-      .addChoices([['Playing', 0], ['Streaming', 1], ['Listening', 2], ['Watching', 3], ['Competing', 5]])
+      .setChoices({ name: 'Playing', value: 0 }, { name: 'Streaming', value: 1 }, { name: 'Listening', value: 2 }, { name: 'Watching', value: 3 }, { name: 'Competing', value: 5 })
   )
   .addStringOption(option => 
     option.setName('url')
