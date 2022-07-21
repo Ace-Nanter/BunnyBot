@@ -7,7 +7,9 @@ import { default as GamesRolesCommand } from './commands/games-roles.command';
 import { MessageHelper } from './helpers/message.helper';
 import { Game, IGame } from './models/game.model';
 import { ActivityScanner } from './services/activity-scanner.service';
-import { GameManager } from './services/game-manager.service';
+import { GameActivator } from './services/game-activator.service';
+import { GameArchiver } from './services/game-archiver.service';
+import { GameCreator } from './services/game-creator.service';
 
 const GAME_CATEGORY_CHANNEL_ID = 'gameCategoryChannelId';
 const ARCHIVE_CATEGORY_CHANNEL_ID = 'archiveCategoryChannelId';
@@ -16,7 +18,9 @@ const SCAN_FREQUENCY = 'scanFrequency'
 export class GamesRolesModule extends BotModule {
 
   private activityScanner: ActivityScanner;
-  private gameManager: GameManager;
+  private gameActivator: GameActivator;
+  private gameCreator: GameCreator;
+  private gameArchiver: GameArchiver;
 
   private guild: Guild;
   private frequency: number;
@@ -25,7 +29,7 @@ export class GamesRolesModule extends BotModule {
 
   protected initCallbacks(): void {
     this.callbacks.set('interactionCreate', async (interaction: Interaction) => {
-      if (interaction.guildId === this.guildId) this.onInteraction(interaction);
+      if (interaction.guildId === this.guildId || interaction.channelId === process.env.LOG_CHANNEL_ID) this.onInteraction(interaction);
     });
     this.callbacks.set('guildMemberAdd', async (guildMember: GuildMember) => {
       if (guildMember.guild.id === this.guildId) this.onNewGuildMember(guildMember);
@@ -43,7 +47,10 @@ export class GamesRolesModule extends BotModule {
 
       await this.initParams(params);
 
-      this.gameManager = new GameManager(this.guild, this.gameCategory, this.archiveCategory);
+      this.gameCreator = new GameCreator(this.guild, this.gameCategory);
+      this.gameActivator = new GameActivator(this.guild, this.gameCategory);
+      this.gameArchiver = new GameArchiver(this.guild, this.gameCategory, this.archiveCategory);
+
       this.activityScanner = new ActivityScanner(this.guild, this.frequency);
       this.activityScanner.start();
     } catch (error) {
@@ -105,34 +112,35 @@ export class GamesRolesModule extends BotModule {
     }
     
     if (interaction.customId.includes('ban-game-')) {
-      this.banGame(interaction);
+      await this.banGame(interaction);
+      return ;
     }
 
     switch(interaction.customId.replace('games-roles-', '')) {
       case 'create':
-        MessageHelper.sendCreateGameModal(interaction);
+        await this.gameCreator.sendCreateGameModal(interaction);
         break;
       case 'activate':
-        MessageHelper.sendActivateSelectMenu(interaction);
+        await this.gameActivator.sendActivateSelectMenu(interaction);
         break;
       case 'deactivate':
-        MessageHelper.sendDeactivateSelectMenu(interaction);
+        await this.gameActivator.sendDeactivateSelectMenu(interaction);
         break;
       case 'archive':
-        MessageHelper.sendArchiveSelectMenu(interaction);
+        await this.gameArchiver.sendArchiveSelectMenu(interaction);
         break;
       case 'unarchive':
-        MessageHelper.sendUnArchiveSelectMenu(interaction);
+        await this.gameArchiver.sendUnArchiveSelectMenu(interaction);
         break;
       case 'send-message':
-        MessageHelper.sendSendMessageModal(interaction);
+        await MessageHelper.sendSendMessageModal(interaction);
         break;
       case 'join':
         await MessageHelper.sendGameSelectionMenu(interaction);
         break;
       default:
         Logger.error(`Unknown button interaction! CustomId: ${interaction.customId}`);
-        interaction.reply({ content: 'Unknown button interaction!', ephemeral: true });
+        await interaction.reply({ content: 'Unknown button interaction!', ephemeral: true });
     }
   }
 
@@ -148,16 +156,16 @@ export class GamesRolesModule extends BotModule {
 
     switch(interaction.customId.replace('games-roles-', '')) {
       case 'activate':
-        this.gameManager.activateGame(interaction);
+        this.gameActivator.activateGame(interaction);
         break;
       case 'deactivate':
-        this.gameManager.deactivateGame(interaction);
+        this.gameActivator.deactivateGame(interaction);
         break;
       case 'archive':
-        this.gameManager.archiveGame(interaction);
+        this.gameArchiver.archiveGame(interaction);
         break;
       case 'unarchive':
-        this.gameManager.unarchiveGame(interaction);
+        this.gameArchiver.unarchiveGame(interaction);
         break;
       case 'join-selected':
         this.manageJoinInteraction(interaction);
@@ -184,7 +192,7 @@ export class GamesRolesModule extends BotModule {
         MessageHelper.sendJoinMessage(interaction);
         break;
       case 'create-game':
-        this.gameManager.createGame(interaction);
+        this.gameCreator.createGame(interaction);
         break;
       default:
         Logger.error(`Unknown modal interaction! CustomId: ${interaction.customId}`);
@@ -241,10 +249,16 @@ export class GamesRolesModule extends BotModule {
    * @param interaction Interaction containing the ID of the game to ban
    */
   private async banGame(interaction: ButtonInteraction): Promise<void> {
+
+    if (interaction.deferred || interaction.replied) {
+      return ;
+    }
+
+    await interaction.deferUpdate();
     const applicationId = interaction.customId.replace(/ban-game-/g,'');
 
     await Game.updateOne({ applicationId: applicationId }, { banned: true });
-    interaction.update({ content: `Game with applicationId ${applicationId} was banned`, components: [] });
+    await interaction.update({ content: `Game with applicationId ${applicationId} was banned`, components: [] });
   }
 
   private onNewGuildMember(member: GuildMember) {
