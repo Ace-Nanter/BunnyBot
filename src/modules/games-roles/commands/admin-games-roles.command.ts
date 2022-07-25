@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, EmbedFieldData, MessageActionRow, MessageButton, MessageEmbed, Snowflake } from 'discord.js';
+import { ActionRow, ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, Snowflake } from 'discord.js';
 import { Command } from '../../../models/command.model';
 import { GamesRolesModule } from '../games-roles.module';
 import { Game, IGame } from '../models/game.model';
@@ -22,8 +22,8 @@ export default class AdminGamesRolesCommand extends Command {
 
   private async sendAdminMessage(interaction: CommandInteraction): Promise<void> {
 
-    const firstRow = new MessageActionRow();
-    const secondRow = new MessageActionRow();
+    const firstRow = new ActionRowBuilder();
+    const secondRow = new ActionRowBuilder();
 
     const games = await Game.getGamesForGuild(interaction.guildId);
     const guildGames: IGuildGame[] = games.map(g => g.guildGames.find(guildGame => guildGame.guildId === interaction.guildId));
@@ -33,53 +33,53 @@ export default class AdminGamesRolesCommand extends Command {
       return ;
     }
 
-    const addGameButton = new MessageButton()
+    const addGameButton = new ButtonBuilder()
       .setCustomId('games-roles-create')
       .setLabel('Create a game')
       .setEmoji('➕')
-      .setStyle('SUCCESS')
+      .setStyle(ButtonStyle.Success)
 
     firstRow.addComponents(addGameButton);
 
-    const activateGameButton = new MessageButton()
+    const activateGameButton = new ButtonBuilder()
       .setCustomId('games-roles-activate')
       .setLabel('Activate a game')
       .setEmoji('➕')
-      .setStyle('SUCCESS');
+      .setStyle(ButtonStyle.Success);
 
     firstRow.addComponents(activateGameButton);
 
-    const deactivateButton = new MessageButton()
+    const deactivateButton = new ButtonBuilder()
       .setCustomId('games-roles-deactivate')
       .setLabel('Remove a game from the server')
       .setEmoji('🗑')
-      .setStyle('DANGER');
+      .setStyle(ButtonStyle.Danger);
 
     firstRow.addComponents(deactivateButton);
 
-    const archiveButton = new MessageButton()
+    const archiveButton = new ButtonBuilder()
       .setCustomId('games-roles-archive')
       .setLabel('Archive a game')
       .setEmoji('📥')
       .setDisabled(!this.gamesRolesModule.archiveCategoryChannel || guildGames.every(g => g.archived))
-      .setStyle('DANGER');
+      .setStyle(ButtonStyle.Danger);
 
     secondRow.addComponents(archiveButton);
     
-    const unarchiveButton = new MessageButton()
+    const unarchiveButton = new ButtonBuilder()
       .setCustomId('games-roles-unarchive')
       .setLabel('Unarchive a game')
       .setEmoji('📤')
       .setDisabled(!this.gamesRolesModule.archiveCategoryChannel || !guildGames.some(g => g.archived))
-      .setStyle('PRIMARY');
+      .setStyle(ButtonStyle.Primary);
 
     secondRow.addComponents(unarchiveButton);
 
-    const sendJoinMessage = new MessageButton()
+    const sendJoinMessage = new ButtonBuilder()
       .setCustomId('games-roles-send-message')
       .setLabel('Put a join button here')
       .setEmoji('📩')
-      .setStyle('PRIMARY');
+      .setStyle(ButtonStyle.Primary);
 
     secondRow.addComponents(sendJoinMessage);
 

@@ -7,7 +7,8 @@ export default class ClearCommand extends Command {
   name = 'clear';
   description = 'Clear messages';
 
-  slashCommand = new SlashCommandBuilder().setName('clear')
+  slashCommand = new SlashCommandBuilder()
+  .setName('clear')
   .setDescription('Clear messages')
   .addIntegerOption(option => 
     option
@@ -18,7 +19,7 @@ export default class ClearCommand extends Command {
   .setDefaultPermission(false);
 
   execution = async (interaction: CommandInteraction): Promise<void> => {
-    const count = interaction.options.getInteger('count');
+    const count: number = interaction.options.get('count', true).value as number;
     
     if(count < 1 || count > 99) {
       interaction.reply({ content: 'You need to input a number between 1 and 99.' });

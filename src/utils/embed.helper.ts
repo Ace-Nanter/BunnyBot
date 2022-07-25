@@ -1,14 +1,15 @@
-import { ColorResolvable, Message, MessageEmbed, TextBasedChannel } from 'discord.js';
+import { EmbedBuilder, RGBTuple } from '@discordjs/builders';
+import { Colors, Message, TextBasedChannel } from 'discord.js';
 
 export class EmbedHelper {
 
   /**
    * @param color the color to use for the embed
    * @param description (optional) the description for the embed
-   * @returns a new MessageEmbed with the given colouring
+   * @returns a new MessageEmbed with the given color
    */
-  public static createColouredEmbed(color: ColorResolvable, description?: string): MessageEmbed {
-    const embed = new MessageEmbed().setColor(color);
+  public static createColouredEmbed(color: number, description?: string): EmbedBuilder {
+    const embed = new EmbedBuilder().setColor(color);
 
     if(description) {
       embed.setDescription(description);
@@ -25,6 +26,6 @@ export class EmbedHelper {
    * @returns a promise for the sent message
    */
    public static createAndSendEmbed(channel: TextBasedChannel, description?: string): Promise<Message> {
-    return channel.send({ embeds: [EmbedHelper.createColouredEmbed('BLUE', description)] });
+    return channel.send({ embeds: [EmbedHelper.createColouredEmbed(Colors.Blue, description)] });
   }
 }

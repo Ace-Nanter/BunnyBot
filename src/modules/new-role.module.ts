@@ -44,7 +44,7 @@ export class NewRoleModule extends BotModule {
       // Get message
       if (guild && params[CHANNEL_ID] && params[MESSAGE_ID]) {
         const channel = guild.channels.resolve(params[CHANNEL_ID]);
-        if (channel.isText) {
+        if (channel.isTextBased()) {
           try {
             message = await (channel as TextChannel).messages.fetch(params[MESSAGE_ID]);
           }

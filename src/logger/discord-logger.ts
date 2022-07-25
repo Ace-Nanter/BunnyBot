@@ -1,4 +1,4 @@
-import { TextChannel, MessageEmbed, Channel } from 'discord.js';
+import { Channel, Colors, EmbedBuilder, TextChannel } from 'discord.js';
 
 export class DiscordLogger implements LoggerInterface {
 
@@ -15,37 +15,37 @@ export class DiscordLogger implements LoggerInterface {
 
   public log(msg: string): void {
     console.log(msg);
-    const messageEmbed = new MessageEmbed()
-      .setColor('#FFFFFF')
+    const builder = new EmbedBuilder()
+      .setColor(Colors.White)
       .setDescription(msg)
       .setTitle('Log');
-    this.channel.send({ embeds: [messageEmbed] });
+    this.channel.send({ embeds: [builder] });
   }
 
   public info(msg: string): void {
     console.info(msg);
-    const messageEmbed = new MessageEmbed()
-      .setColor('#0000FF')
+    const builder = new EmbedBuilder()
+      .setColor(Colors.Blue)
       .setDescription(msg)
       .setTitle('Info');
-    this.channel.send({ embeds: [messageEmbed] });
+    this.channel.send({ embeds: [builder] });
   }
 
   public error(msg: string): void {
     console.error(msg);
-    const messageEmbed = new MessageEmbed()
-      .setColor('#FF0000')
+    const builder = new EmbedBuilder()
+      .setColor(Colors.Red)
       .setDescription(msg)
       .setTitle('Error');
-    this.channel.send({ embeds: [messageEmbed] });
+    this.channel.send({ embeds: [builder] });
   }
 
   public warn(msg: string): void {
     console.warn(msg);
-    const messageEmbed = new MessageEmbed()
-      .setColor('#FFFF00')
+    const builder = new EmbedBuilder()
+      .setColor(Colors.Orange)
       .setDescription(msg)
       .setTitle('Warn');
-    this.channel.send({ embeds: [messageEmbed] });
+    this.channel.send({ embeds: [builder] });
   }
 }

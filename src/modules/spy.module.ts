@@ -1,4 +1,4 @@
-import { CategoryChannel, Guild, Message, TextChannel } from "discord.js";
+import { CategoryChannel, ChannelType, Guild, Message, TextChannel } from "discord.js";
 import { Bot } from "../bot";
 import { BotModule } from "../models/bot-module.model";
 
@@ -40,7 +40,7 @@ export class SpyModule extends BotModule {
 
         // Create channel if it doesn't exist
         if(!targetChannel) {
-          this.category.createChannel(originChannel.name, { type: 'GUILD_TEXT' }).then(textChannel => {
+          this.category.children.create({ name: originChannel.name, type: ChannelType.GuildText }).then(textChannel => {
             textChannel.send(msgTmp);
           });
         }

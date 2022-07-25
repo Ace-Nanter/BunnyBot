@@ -20,7 +20,13 @@ export default class SetActivityCommand extends Command {
     option.setName('type')
       .setDescription('Type of activity')
       .setRequired(true)
-      .addChoices([['Playing', 0], ['Streaming', 1], ['Listening', 2], ['Watching', 3], ['Competing', 5]])
+      .addChoices(
+        { name: 'Playing', value: 0 },
+        { name: 'Streaming', value: 1 },
+        { name: 'Listening', value: 2 },
+        { name: 'Watching', value: 3 },
+        { name: 'Competing', value: 5 }
+      )
   )
   .addStringOption(option => 
     option.setName('url')
@@ -30,10 +36,10 @@ export default class SetActivityCommand extends Command {
   .setDefaultPermission(false);
 
   execution = async (interaction: CommandInteraction): Promise<void> => {
-    const activityDescription = interaction.options.getString('activity');
+    const activityDescription = (interaction.options.get('activity').value) as string;
     const activityOptions = {
-      type: interaction.options.getInteger('type'),
-      url: interaction.options.getString('url')
+      type: (interaction.options.get('type').value) as number,
+      url: (interaction.options.get('url').value) as string
     };
     
     Bot.getClient().user.setActivity(activityDescription, activityOptions);

@@ -26,7 +26,7 @@ export class GuildHelper {
       return foundGuild.roles.fetch().then(roles => {
         const userIds = [];
 
-        roles.filter(role => role.permissions.has('ADMINISTRATOR')).forEach(role => {
+        roles.filter(role => role.permissions.has("Administrator")).forEach(role => {
           role.members.forEach(member => { 
             userIds.push(member.id);
           }); 
