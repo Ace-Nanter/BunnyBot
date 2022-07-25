@@ -1,4 +1,5 @@
-import { ButtonInteraction, CommandInteraction, GuildMember, Interaction, MessageActionRow, MessageButton, MessageSelectMenu, MessageSelectOptionData, Modal, ModalActionRowComponent, ModalSubmitInteraction, TextInputComponent } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ModalBuilder, SelectMenuBuilder, TextInputBuilder } from "@discordjs/builders";
+import { APISelectMenuOption, ButtonInteraction, CommandInteraction, GuildMember, ModalSubmitInteraction } from "discord.js";
 import { Logger } from "../../../logger/logger";
 import { Game, IGame } from "../models/game.model";
 
@@ -7,24 +8,24 @@ export class MessageHelper {
   public static async sendSendMessageModal(interaction: ButtonInteraction): Promise<void> {
 
     // Create the modal
-		const modal = new Modal()
+		const modal = new ModalBuilder()
       .setCustomId('games-roles-send-message')
       .setTitle('Send a button for people to choose roles');
     
     // Add components to modal
-    const messageInput = new TextInputComponent()
+    const messageInput = new TextInputBuilder()
       .setCustomId('message-content')
       .setLabel("What should be the message content?")
       .setStyle('PARAGRAPH');
   
-    const buttonInput = new TextInputComponent()
+    const buttonInput = new TextInputBuilder()
       .setCustomId('button-content')
       .setLabel("What should be the button content?")
       .setStyle('SHORT');
 
     modal.addComponents(
-      new MessageActionRow<ModalActionRowComponent>().addComponents(messageInput),
-      new MessageActionRow<ModalActionRowComponent>().addComponents(buttonInput)
+      new ActionRowBuilder().addComponents(messageInput),
+      new ActionRowBuilder().addComponents(buttonInput)
     );
     
     // Show the modal to the user
@@ -38,14 +39,14 @@ export class MessageHelper {
    */
   public static async sendJoinMessage(interaction: ModalSubmitInteraction): Promise<void> {
 
-    const messageActionRow = new MessageActionRow();
+    const messageActionRow = new ActionRowBuilder();
 
     // Message content
     const messageContent: string = interaction.fields.getTextInputValue('message-content');
     const buttonContent: string = interaction.fields.getTextInputValue('button-content');
 
     // Join button
-    const button = new MessageButton()
+    const button = new ButtonBuilder()
       .setCustomId('games-roles-join')
       .setEmoji('🎮')
       .setLabel(buttonContent ? buttonContent : 'Join a game')
@@ -62,19 +63,19 @@ export class MessageHelper {
    * 
    * @param interaction Interaction to answer
    */
-   public static async sendGameSelectionMenu(interaction: Interaction): Promise<void> {
+   public static async sendGameSelectionMenu(interaction: ButtonInteraction | CommandInteraction): Promise<void> {
 
     if (interaction.isButton()) {
       await interaction.deferReply({ ephemeral: true });
     }
 
-    const messageActionRow = new MessageActionRow();
-    const selectMenu = new MessageSelectMenu();
+    const messageActionRow = new ActionRowBuilder();
+    const selectMenu = new SelectMenuBuilder();
     selectMenu.setCustomId('games-roles-join-selected');
     selectMenu.setPlaceholder('Choose a game')
     
     const games = await Game.getGamesWithRolesForGuild(interaction.guildId);
-    const options: MessageSelectOptionData[] = await Promise.all(games.map(async (game: IGame) => {
+    const options: APISelectMenuOption[] = await Promise.all(games.map(async (game: IGame) => {
       try {
         const selected: boolean = await MessageHelper.getGameRoleForUser(game, interaction.member as GuildMember);
         return { label: game.gameName, value: game.applicationId, default: selected };

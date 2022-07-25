@@ -1,8 +1,9 @@
-import { Activity, Collection, Guild, GuildMember, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { Activity, Collection, Guild, GuildMember } from 'discord.js';
 import { Logger } from '../../../logger/logger';
 import { Bot } from '../../../bot';
 import { Game, IGame } from '../models/game.model';
 import { IGuildGame } from '../models/guild-game.model';
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from '@discordjs/builders';
 
 export class ActivityScanner {
 
@@ -110,15 +111,15 @@ export class ActivityScanner {
     
     const channel = await Bot.getClient().channels.fetch(process.env.LOG_CHANNEL_ID);
 
-    if (!channel || !channel.isText()) return ;
+    if (!channel || !channel.isTextBased()) return ;
     
-    const messageEmbed = new MessageEmbed()
-      .setColor('#0000FF')
+    const messageEmbed = new EmbedBuilder()
+      .setColor(0x0000FF)
       .setDescription(`Created game ${activity.name} with ID ${activity.applicationId}`)
       .setTitle('Log');
 
-    const row = new MessageActionRow().addComponents(
-      new MessageButton()
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
         .setLabel('Ban')
         .setCustomId(`games-roles-ban-game-${activity.applicationId}`)
         .setStyle('DANGER')

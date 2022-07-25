@@ -1,4 +1,4 @@
-import { ButtonInteraction, CategoryChannel, Guild, GuildMember, Interaction, MessageFlags, ModalSubmitInteraction, SelectMenuInteraction } from 'discord.js';
+import { BaseInteraction, ButtonInteraction, CategoryChannel, Guild, GuildMember, Interaction, InteractionType, ModalSubmitInteraction, SelectMenuInteraction } from 'discord.js';
 import { Bot } from '../../bot';
 import { Logger } from '../../logger/logger';
 import { BotModule } from '../../models/bot-module.model';
@@ -87,7 +87,7 @@ export class GamesRolesModule extends BotModule {
     }
   }
 
-  private onInteraction(interaction: Interaction): void {
+  private onInteraction(interaction: BaseInteraction): void {
     if (interaction.isButton()) {
       this.manageButtonInteraction(interaction as ButtonInteraction); 
     }
@@ -96,7 +96,7 @@ export class GamesRolesModule extends BotModule {
       this.manageSelectMenuInteractions(interaction as SelectMenuInteraction);
     }
 
-    if (interaction.isModalSubmit()) {
+    if (interaction.type === InteractionType.ModalSubmit) {
       this.manageModalSubmitInteractions(interaction as ModalSubmitInteraction);
     }
   }
@@ -222,7 +222,7 @@ export class GamesRolesModule extends BotModule {
     }));
 
     const message = await interaction.editReply({ content: 'Roles updated!', components: []});
-    if (message.flags != MessageFlags.FLAGS.EPHEMERAL) {
+    if (message.deletable) {
       setTimeout(() => { interaction.deleteReply(); }, 5000);
     }
   }
