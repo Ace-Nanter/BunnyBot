@@ -1,18 +1,27 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
-import { Command } from '../../../models/command.model';
+import { Logger } from '../../../logger/logger';
+import MinecraftBaseCommand from './minecraft-base-command.model';
 
-export default class StartServerCommand extends Command {
-  name = 'start-server';
+export default class StartServerCommand extends MinecraftBaseCommand {
+  name = 'start';
   description = 'Starts Minecraft server';
 
-  slashCommand = new SlashCommandBuilder().setName(this.name)
-  .setDescription(this.description)
-  .setDefaultPermission(false);
+  slashCommand = new SlashCommandSubcommandBuilder()
+    .setName(this.name)
+    .setDescription(this.description)
 
   execution = async (interaction: CommandInteraction): Promise<void> => {
-    
-    interaction.reply({ content: `Minecraft server started.` });
+    await interaction.deferReply();
+
+    Logger.info(`${interaction.user.username} used command 'minecraft start'`);
+
+    try {
+      await this.minecraftModule.client.startServer();
+      await interaction.editReply({ content: `🟢 Server is starting...`});
+    } catch (error) {
+      await interaction.editReply({ content: error });
+    }
   }
 }
  
