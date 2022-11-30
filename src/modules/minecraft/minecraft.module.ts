@@ -1,26 +1,20 @@
-import { Guild } from 'discord.js';
 import { BotModule } from '../../models/bot-module.model';
-import { default as GetOnlinePlayersCommandClass } from './commands/get-online-players.command';
-import { default as GetServerStatusCommandClass } from './commands/get-server-status.command';
-import { default as StartServerCommandClass } from './commands/start-server.command';
-import { default as StopServerCommandsClass } from './commands/stop-server.command';
+import { default as MinecraftCommandClass } from './commands/minecraft.command';
+import { MinecraftInterfaceClient } from './minecraft-interface.client';
 
-export class GuildMessagesModule extends BotModule {
+export class MinecraftModule extends BotModule {
 
-  private guild: Guild;
+  public client: MinecraftInterfaceClient;
   
   protected initCallbacks(): void {
     this.callbacks = new Map();
   }
 
   protected initCommands(): void {
-    this.commands.push(new StartServerCommandClass(this));
-    this.commands.push(new StopServerCommandsClass(this));
-    this.commands.push(new GetServerStatusCommandClass(this));
-    this.commands.push(new GetOnlinePlayersCommandClass(this));
+    this.commands.push(new MinecraftCommandClass(this));
   }
 
-  protected async initModule(): Promise<void> {
-    console.log('Coucou');
+  protected async initModule(params?: any[]): Promise<void> {
+    this.client = new MinecraftInterfaceClient(params['serverUrl']);
   }
 }
