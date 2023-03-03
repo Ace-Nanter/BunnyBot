@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@BunnyBot/logger": ["libs/logger/src/index.ts"]
+      "@BunnyBot/logger": ["libs/logger/src/index.ts"],
+      "@BunnyBot/mongo-client": ["libs/mongo-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

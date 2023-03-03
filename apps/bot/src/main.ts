@@ -1,11 +1,11 @@
 import { exit } from 'process';
 import { Logger } from '@BunnyBot/logger';
-// import { connect } from 'mongoose';s
-// import { Bot } from './bot';
+import { mongoClient } from '@BunnyBot/mongo-client';
+import Bot from './bot';
 
 checkEnvironmentVariables();
-// initDatabase();
-// Bot.start();
+initDatabase();
+Bot.start();
 
 /**
  * Check that environment variables are correctly set
@@ -24,28 +24,28 @@ function checkEnvironmentVariables() {
 
   neededVariables.forEach((variable: string) => {
     if (!process.env[variable]) {
+      // eslint-disable-next-line no-console
       console.error(`Error: missing environment variable "${variable}"!`);
       exit(0);
     }
   });
 }
 
-// /**
-//  * Establish connection with database
-//  */
-// async function initDatabase() {
-//   await connect(process.env.DATABASE_URI, {
-//     dbName: process.env.DATABASE_NAME,
-//     auth: {
-//       username: process.env.DATABASE_USERNAME,
-//       password: process.env.DATABASE_PASSWORD,
-//     },
-//     authSource: process.env.DATABASE_NAME
-//   }).catch((error) => {
-//     console.error('An error occurred while connecting to database!', error);
-//     exit(0);
-//   });
-// }
+/**
+ * Establish connection with database
+ */
+async function initDatabase() {
+  mongoClient({
+    uri: process.env.DATABASE_URI,
+    dbName: process.env.DATABASE_NAME,
+    username: process.env.DATABASE_USERNAME,
+    password: process.env.DATABASE_PASSWORD,
+  }).catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error('An error occurred while connecting to database!', error);
+    exit(0);
+  });
+}
 
 // Fail safe
 process

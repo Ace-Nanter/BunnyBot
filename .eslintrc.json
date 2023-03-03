@@ -52,13 +52,7 @@
         "jsx": "ignorePackages",
         "generated": "ignorePackages"
       }
-    ],
-    "import/no-extraneous-dependencies": [
-      "error",
-      {
-        "devDependencies": ["**/*.spec.tsx", "**/*.stories.tsx"]
-      }
-    ],
+    ],    
     "import/no-unresolved": [
       2,
       {
