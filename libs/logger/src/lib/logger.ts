@@ -1,5 +1,5 @@
+import { TextChannel } from 'discord.js';
 import DiscordLogger from './discord-logger';
-import LoggerType from './logger-type';
 
 export interface ILogger {
   log(msg: string): void;
@@ -14,18 +14,8 @@ export interface ILogger {
 export class Logger {
   private static instance: ILogger | undefined;
 
-  public static setLoggerType(type: LoggerType, ...args: any[]): void {
-    switch (type) {
-      case LoggerType.DiscordLogger:
-        if (args && args.length === 1 && args[0]) {
-          Logger.instance = new DiscordLogger(args[0]);
-        } else {
-          console.error('Not enough argument to create a DiscordLogger!');
-        }
-        break;
-      default:
-        break;
-    }
+  public static initDiscordLogger(textChannel: TextChannel): void {
+    Logger.instance = new DiscordLogger(textChannel);
   }
 
   public static log(msg: string): void {
@@ -56,3 +46,5 @@ export class Logger {
     }
   }
 }
+
+export default Logger;
