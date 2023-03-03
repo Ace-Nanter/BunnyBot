@@ -1,7 +1,91 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nrwl/nx"],
+  "plugins": ["@nrwl/nx", "prettier"],
+  "extends": ["prettier", "eslint:recommended", "plugin:@typescript-eslint/recommended", "airbnb", "airbnb/hooks"],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-warning-comments": "warn",
+    "react/jsx-filename-extension": [
+      2,
+      {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    ],
+    "react/jsx-props-no-spreading": 0,
+    "react/react-in-jsx-scope": "off",
+    "react/function-component-definition": [
+      2,
+      {
+        "namedComponents": ["function-declaration", "function-expression", "arrow-function"]
+      }
+    ],
+    "react/prop-types": 0,
+    "react/require-default-props": 0,
+    "react/default-props-match-prop-types": 0,
+    "react/jsx-no-useless-fragment": [2, { "allowExpressions": true }],
+
+    "no-use-before-define": [
+      2,
+      {
+        "functions": false
+      }
+    ],
+    "@next/next/no-img-element": 0,
+    "jsx-a11y/label-has-associated-control": [
+      2,
+      {
+        "assert": "either"
+      }
+    ],
+    "no-process-env": 2,
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"],
+
+    "import/extensions": [
+      "error",
+      {
+        "*": "always",
+        "tsx": "ignorePackages",
+        "ts": "ignorePackages",
+        "js": "ignorePackages",
+        "jsx": "ignorePackages",
+        "generated": "ignorePackages"
+      }
+    ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": ["**/*.spec.tsx", "**/*.stories.tsx"]
+      }
+    ],
+    "import/no-unresolved": [
+      2,
+      {
+        "ignore": ["@BunnyBot/*", "~/*"]
+      }
+    ],
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "import/named": 0,
+    "no-console": 2,
+    "no-alert": 2
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx", ".d.ts"]
+      }
+    }
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -32,28 +116,11 @@
       "rules": {}
     },
     {
-      "files": ["*.spec.ts", "*.spec.tsx", "*.spec.js", "*.spec.jsx"],
-      "env": {
-        "jest": true
-      },
-      "rules": {}
+      "files": ["**/*.config.[t,j]s", "**/*.setup.[t,j]s"],
+      "rules": {
+        "global-require": 0,
+        "import/no-extraneous-dependencies": 0
+      }
     }
   ]
 }
-
-// {
-//   "root": true,
-//   "parser": "@typescript-eslint/parser",
-//   "plugins": [
-//     "@typescript-eslint"
-//   ],
-//   "extends": [
-//     "eslint:recommended",
-//     "plugin:@typescript-eslint/eslint-recommended",
-//     "plugin:@typescript-eslint/recommended"
-//   ],
-//   "rules": {
-//     "@typescript-eslint/no-empty-function": [ "error", { "allow": ["constructors"] } ],
-//     "@typescript-eslint/no-explicit-any": [ "off" ]
-//   }
-// }
