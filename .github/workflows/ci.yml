@@ -1,47 +1,50 @@
-# name: Node.js CI
+name: CI
 
-# on:
-#   push:
-#     # Publish `master` as Docker `latest` image.
-#     branches:
-#       - master
+on:
+  push:
+    # Publish `main` as Docker `latest` image.
+    branches:
+      - main
 
-#     # Publish `v1.2.3` tags as releases.
-#     tags:
-#       - v*
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
 
-#   pull_request:
-#     branches:
-#       - master
+  pull_request:
+    branches:
+      - main
 
-# jobs:
-#   checkAndBuild:
-#     runs-on: ubuntu-latest
+jobs:
+  checkAndBuild:
+    runs-on: ubuntu-latest
+    name: Lint & Build
+    permissions:
+      contents: 'read'
+      actions: 'read'
 
-#     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v2
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-#     - name: Setup node
-#       uses: actions/setup-node@v2
-#       with:
-#         node-version: 16.x
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 18
 
-#     - name: npm install
-#       run: npm install
+    - name: npm install
+      run: npm ci
 
-#     - name: linter
-#       run: npm run lint
+    - name: lint
+      run: npx nx run-many --target=lint --all=true --parallel=3
  
-#     - name: build ts files
-#       run: npm run build
+    - name: build
+      run: npx nx run-many --target=build --parallel=3
       
-#     - name: Archive builded js
-#       uses: actions/upload-artifact@v2
-#       with:
-#         name: dist
-#         path: dist
-#         retention-days: 1
+    - name: Archive builded js
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist
+        retention-days: 1
           
 #   dockerize:
 #     runs-on: ubuntu-latest
@@ -83,7 +86,7 @@
 #         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           
 #         # Use Docker `latest` tag convention
-#         [ "$VERSION" == "master" ] && VERSION=latest
+#         [ "$VERSION" == "main" ] && VERSION=latest
 
 #         # If integration
 #         [ "${{ github.event_name }}" == "pull_request" ] && VERSION=integration
