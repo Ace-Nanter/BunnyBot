@@ -22,7 +22,7 @@ export default function UserMenu() {
       <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
         <span className="sr-only">Open user menu</span>
         {session.user?.image ? (
-          <img className="h-12 w-12 rounded-full" src={session.user.image} alt="User profile picture" />
+          <img className="h-12 w-12 rounded-full" src={session.user.image} alt="User profile" />
         ) : null}
       </Menu.Button>
 
@@ -47,6 +47,7 @@ export default function UserMenu() {
             <Menu.Item>
               {({ active }) => (
                 <button
+                  type="button"
                   onClick={() => signOut()}
                   className={`block px-4 py-2 text-sm text-gray-700 ${active ? 'bg-gray-100' : ''}`}
                 >

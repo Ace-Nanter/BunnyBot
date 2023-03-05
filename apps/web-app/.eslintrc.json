@@ -10,7 +10,8 @@
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-        "@next/next/no-html-link-for-pages": ["error", "apps/web-app/pages"]
+        "@next/next/no-html-link-for-pages": ["error", "apps/web-app/pages"],
+        "no-process-env": 0
       }
     },
     {
@@ -23,8 +24,8 @@
     }
   ],
   "rules": {
-    "@next/next/no-html-link-for-pages": "off",
-    "@nrwl/nx/workspace/use-effect-deps": "error"
+    "@next/next/no-html-link-for-pages": "off"
+    // "@nrwl/nx/workspace/use-effect-deps": "error"
   },
   "env": {
     "jest": true

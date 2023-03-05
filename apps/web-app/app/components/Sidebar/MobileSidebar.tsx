@@ -3,13 +3,13 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Fragment, useState } from 'react';
-import { Navigation } from './Sidebar';
+import { Navigation } from './Navigation';
 
 export interface MobileSidebarProps {
   navigation: Navigation[];
 }
 
-export default function MobileSidebar({ navigation }) {
+export default function MobileSidebar({ navigation }: MobileSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (

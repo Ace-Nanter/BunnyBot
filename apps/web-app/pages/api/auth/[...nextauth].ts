@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import DiscordProvider from 'next-auth/providers/discord';
 

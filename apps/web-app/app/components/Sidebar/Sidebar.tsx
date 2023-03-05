@@ -3,15 +3,9 @@
 import { Bars4Icon, ClockIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { Guild } from '../../../models/guild';
 import { APP_MODE, APP_NAME } from '../../config';
-import GuildMenu from '../header/GuildMenu';
+import GuildMenu from './GuildMenu';
 import MobileSidebar from './MobileSidebar';
-
-export type Navigation = {
-  name: string;
-  href: string;
-  icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>;
-  current: boolean;
-};
+import { Navigation } from './Navigation';
 
 const navigation: Navigation[] = [
   { name: 'Home', href: '#', icon: HomeIcon, current: true },
@@ -28,7 +22,7 @@ export default function Sidebar({ guilds }: SidebarProps) {
     <>
       <MobileSidebar navigation={navigation} />
 
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-gray-200 lg:bg-menu lg:pt-5 lg:pb-4">
+      <div className="lg:bg-menu hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-gray-200 lg:pt-5 lg:pb-4">
         <a href="/" className="flex flex-shrink-0 items-center justify-center space-x-5 px-6">
           <img className="h-8 w-auto" src={`/logos/${APP_MODE.toLowerCase()}.png`} alt={APP_NAME} />
           <span className="text-center text-lg font-semibold">{APP_NAME}</span>
