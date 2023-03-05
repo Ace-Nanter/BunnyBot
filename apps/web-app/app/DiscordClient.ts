@@ -17,10 +17,9 @@ const DiscordClient = () => {
   });
 
   instance.interceptors.response.use(
-    (response) => {
-      return response;
-    },
+    (response) => response,
     (error) => {
+      // eslint-disable-next-line no-console
       console.log(`error`, error);
     }
   );

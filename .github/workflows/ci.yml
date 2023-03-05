@@ -36,8 +36,8 @@ jobs:
     - name: lint
       run: npx nx run-many --target=lint --all=true --parallel=3
  
-    - name: build
-      run: npx nx run-many --target=build --parallel=3
+    - name: build bot
+      run: npx nx build bot
       
     - name: Archive builded js
       uses: actions/upload-artifact@v2

@@ -1,6 +1,6 @@
-import { Guild } from '../models/guild';
 import { getServerSession } from 'next-auth';
 import React from 'react';
+import { Guild } from '../models/guild';
 import AuthContext from './AuthContext';
 import Header from './components/header/Header';
 import Sidebar from './components/Sidebar/Sidebar';
@@ -21,13 +21,14 @@ async function fetchDiscordGuilds(): Promise<Guild[]> {
     return [];
   }
 
-  return response.data.map((guild: any) => {
-    return {
-      id: guild.id,
-      name: guild.name,
-      iconUrl: `${DISCORD_CONTENT_URL}/icons/${guild.id}/${guild.icon}`,
-    } as Guild;
-  });
+  return response.data.map(
+    (guild: any) =>
+      ({
+        id: guild.id,
+        name: guild.name,
+        iconUrl: `${DISCORD_CONTENT_URL}/icons/${guild.id}/${guild.icon}`,
+      } as Guild)
+  );
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
@@ -41,7 +42,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <link rel="icon" type="image/x-icon" href={`/logos/${APP_MODE.toLowerCase()}.png`} />
         <title>{APP_NAME}</title>
       </head>
-      <body className="min-h-full bg-gray-100 dark:bg-primary dark:text-white">
+      <body className="dark:bg-primary min-h-full bg-gray-100 dark:text-white">
         {session ? (
           <AuthContext>
             <Sidebar guilds={guilds} />

@@ -1,9 +1,9 @@
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { APP_MODE, APP_NAME } from '../../config';
-import SignInButton from '../../components/auth/SignInButton';
+import { getServerSession } from 'next-auth';
+import SignInButton from '~/components/auth/SignInButton';
+import { APP_MODE, APP_NAME } from '~/config';
 
-export default async function LoginPage() {
+export async function LoginPage() {
   const session = await getServerSession();
 
   if (session) {
@@ -16,7 +16,7 @@ export default async function LoginPage() {
         <div>
           <img className="mx-auto h-12 w-auto" src={`/logos/${APP_MODE.toLowerCase()}.png`} alt={`${APP_NAME}`} />
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-white">
-            Bienvenue sur l'application {APP_NAME}
+            Bienvenue sur l&#039application {APP_NAME}
           </h2>
         </div>
 
@@ -27,3 +27,5 @@ export default async function LoginPage() {
     </div>
   );
 }
+
+export default LoginPage;
