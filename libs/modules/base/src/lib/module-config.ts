@@ -1,6 +1,7 @@
+/* eslint-disable no-use-before-define */
 import { Schema, Model, model } from 'mongoose';
 
-interface IModuleConfig extends Document {
+export interface IModuleConfig extends Document {
   moduleName: string;
   guildId: string;
   enabled: boolean;
@@ -22,8 +23,6 @@ export const ModuleConfigSchema = new Schema<IModuleConfig>(
   { collection: 'modules' }
 );
 
-export const ModuleConfig: IModuleConfigModel = model<IModuleConfig, IModuleConfigModel>('modules', ModuleConfigSchema);
-
 ModuleConfigSchema.static('getAll', () =>
   ModuleConfig.find({})
     .then((result) => {
@@ -42,3 +41,7 @@ ModuleConfigSchema.static('updateParams', (moduleName: string, params: Map<strin
     .then(() => Promise.resolve())
     .catch((error) => Promise.reject(error))
 );
+
+export const ModuleConfig: IModuleConfigModel = model<IModuleConfig, IModuleConfigModel>('modules', ModuleConfigSchema);
+
+export default ModuleConfig;

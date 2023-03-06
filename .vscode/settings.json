@@ -1,12 +1,12 @@
 {
-  "cSpell.words": [
-    "audioonly",
-    "discordjs",
-    "timeseries",
-    "ytdl",
-    "ytsr"
-  ],
-  "cSpell.ignoreWords": [
-    "libsodium"
-  ]
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "tailwindCSS.classAttributes": ["class", "className"],
+  "files.associations": { "*.css": "tailwindcss" },
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "cSpell.words": ["audioonly", "discordjs", "timeseries", "ytdl", "ytsr"],
+  "cSpell.ignoreWords": ["libsodium"]
 }

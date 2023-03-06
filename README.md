@@ -1,6 +1,6 @@
 # BunnyBot
-An awesome discord bot !
 
+An awesome discord bot !
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
@@ -10,14 +10,13 @@ An awesome discord bot !
 
 Run `nx graph` to see a diagram of the dependencies of the projects.
 
-
 ## Generate an application
 
 Run `nx g @nrwl/next:app my-app` to generate an application.
 
 When using Nx, you can create multiple applications and libraries in the same workspace.
 
-After generated a library, if `merge-paths:watch` has not already been called, you should run at least `merge-paths` to 
+After generated a library, if `merge-paths:watch` has not already been called, you should run at least `merge-paths` to
 update paths in sub-projects.
 
 ## Generate a library
@@ -26,5 +25,5 @@ Run `nx g @nrwl/js:lib my-lib` to generate a library.
 
 Libraries are shareable across libraries and applications. They can be imported from `@iv4/mylib`.
 
-After generated a library, if `merge-paths:watch` has not already been called, you should run at least `merge-paths` to 
+After generated a library, if `merge-paths:watch` has not already been called, you should run at least `merge-paths` to
 update paths in sub-projects.

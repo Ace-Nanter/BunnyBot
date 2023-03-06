@@ -19,6 +19,7 @@ node_modules
 
 # IDE - VSCode
 .vscode/*
+!.vscode/launch.json
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/extensions.json
@@ -39,3 +40,6 @@ Thumbs.db
 
 # Next.js
 .next
+
+# Env files
+/**/.env*

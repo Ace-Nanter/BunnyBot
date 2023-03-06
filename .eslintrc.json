@@ -52,7 +52,7 @@
         "jsx": "ignorePackages",
         "generated": "ignorePackages"
       }
-    ],    
+    ],
     "import/no-unresolved": [
       2,
       {

@@ -54,5 +54,5 @@ process
   })
   .on('uncaughtException', (err) => {
     Logger.error(`Uncaught exception: ${err}`);
-    // Bot.getInstance().disconnect(1);
+    Bot.getInstance().disconnect(1);
   });
