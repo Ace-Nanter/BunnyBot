@@ -1,4 +1,4 @@
-import { connect } from 'mongoose';
+import mongoose, { connect } from 'mongoose';
 
 export interface MongoParams {
   uri: string;
@@ -16,5 +16,9 @@ export const mongoClient = ({ uri, dbName, username, password }: MongoParams) =>
     },
     authSource: dbName,
   });
+
+export const disconnectMongo = () => {
+  mongoose.disconnect();
+};
 
 export default mongoClient;

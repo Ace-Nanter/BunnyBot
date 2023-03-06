@@ -23,29 +23,28 @@ jobs:
       actions: 'read'
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - uses: actions/setup-node@v1
-      with:
-        node-version: 18
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 18
 
-    - name: npm install
-      run: npm ci
+      - name: npm install
+        run: npm ci
 
-    - name: lint
-      run: npx nx run-many --target=lint --all=true --parallel=3
- 
-    - name: build bot
-      run: npx nx build bot
-      
-    - name: Archive builded js
-      uses: actions/upload-artifact@v2
-      with:
-        name: dist
-        path: dist
-        retention-days: 1
-          
+      - name: lint
+        run: npx nx run-many --target=lint --all=true --parallel=3
+
+      - name: build bot
+        run: npx nx build bot
+
+      - name: Archive builded js
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
+          retention-days: 1
 #   dockerize:
 #     runs-on: ubuntu-latest
 #     needs: checkAndBuild
@@ -56,8 +55,8 @@ jobs:
 #     steps:
 #     - name: Checkout repository
 #       uses: actions/checkout@v3
-      
-#     - name: Set up Docker Buildx      
+
+#     - name: Set up Docker Buildx
 #       uses: crazy-max/ghaction-docker-buildx@v3
 #       with:
 #         version: latest
@@ -75,16 +74,16 @@ jobs:
 #       id: prepare-variables
 #       run: |
 #         IMAGE_ID=${{ env.DOCKER_REGISTRY_HOST }}/$IMAGE_NAME
-    
+
 #         # Change all uppercase to lowercase
 #         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          
+
 #         # Strip git ref prefix from version
 #         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
 #         # Strip "v" prefix from tag name
 #         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          
+
 #         # Use Docker `latest` tag convention
 #         [ "$VERSION" == "main" ] && VERSION=latest
 
@@ -96,10 +95,10 @@ jobs:
 
 #     - name: Login to Docker Registry
 #       if: success()
-#       run: |        
+#       run: |
 #         echo "${{ secrets.DOCKER_REGISTRY_PASSWORD }}" | docker login ${{ env.DOCKER_REGISTRY_HOST }} --username "${{ secrets.DOCKER_REGISTRY_USERNAME }}" --password-stdin
 
 #     - name: Run Buildx (Build and push to integration)
 #       if: success()
-#       run: |        
+#       run: |
 #         docker buildx build --platform linux/amd64,linux/arm64 --tag ${{ steps.prepare-variables.outputs.image }}:${{ steps.prepare-variables.outputs.tag }} --output "type=image,push=true" .

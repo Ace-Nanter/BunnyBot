@@ -1,7 +1,9 @@
 import { Logger } from '@BunnyBot/logger';
+import { BotModule, Command, IModuleConfig, ModuleConfig } from '@BunnyBot/modules/base';
+import { disconnectMongo } from '@BunnyBot/mongo-client';
 import { REST } from '@discordjs/rest';
-import { ChannelType, Client, GatewayIntentBits, Snowflake } from 'discord.js';
-import { Command } from './models/command.model';
+import { ChannelType, Client, CommandInteraction, GatewayIntentBits, Interaction, Routes, Snowflake } from 'discord.js';
+import initModule from './init-module';
 
 export class Bot {
   // eslint-disable-next-line no-use-before-define
@@ -18,10 +20,6 @@ export class Bot {
     }
 
     return Bot.Instance;
-  }
-
-  public static getClient(): Client {
-    return Bot.getInstance().client;
   }
 
   public static getId(): Snowflake {
@@ -62,23 +60,23 @@ export class Bot {
         await this.initLogger();
 
         // Load modules
-        // const moduleConfigList = await ModuleConfig.getAll();
-        // await this.loadModules(moduleConfigList);
+        const moduleConfigList = await ModuleConfig.getAll();
+        await this.loadModules(moduleConfigList);
 
         Logger.info('Bot started successfully');
       } catch (error) {
         Logger.error(error);
-        // this.disconnect();
+        this.disconnect();
       }
     });
 
-    // this.client.on('interactionCreate', async (interaction: Interaction) => {
-    //   if (!interaction.isCommand()) {
-    //     return;
-    //   }
+    this.client.on('interactionCreate', async (interaction: Interaction) => {
+      if (!interaction.isCommand()) {
+        return;
+      }
 
-    //   this.onCommandInteraction(interaction as CommandInteraction);
-    // });
+      this.onCommandInteraction(interaction as CommandInteraction);
+    });
 
     this.client.on('disconnect', () => {
       Logger.warn('Disconnecting...');
@@ -94,153 +92,175 @@ export class Bot {
     }
   }
 
-  // private async loadModules(moduleConfigList: IModuleConfig[]) {
-  //   await moduleConfigList.forEach(async (moduleConfig: IModuleConfig) => {
-  //     try {
-  //       const module = await ModuleLoader.loadModule(moduleConfig);
+  private async loadModules(moduleConfigList: IModuleConfig[]) {
+    await moduleConfigList
+      .filter((module) => module.enabled)
+      .forEach(async (moduleConfig: IModuleConfig) => {
+        // Fetch module and launch initialization
+        await initModule(this.client, moduleConfig)
+          .then((module) => {
+            // Load module callbacks
+            this.loadCallbacks(module);
 
-  //       // Load module events
-  //       if (module && module.getCallbacks()) {
-  //         module.getCallbacks().forEach((eventType) => {
-  //           this.client.on(eventType, module.getCallback(eventType));
-  //         });
-  //       }
-  //     } catch (error) {
-  //       Logger.warn(`Error while initializing module ${moduleConfig.moduleName}: ${error}`);
-  //     }
-  //   });
+            // Load module commands
+            this.loadCommands(module);
+          })
+          .catch((error) => {
+            Logger.error(`Error while initializing module ${moduleConfig.moduleName}: ${error}`);
+          });
+      });
 
-  //   await this.publishCommands();
-  // }
+    await this.publishCommands();
+  }
 
-  // /**
-  //  * Disconnect client and shut application
-  //  */
-  // public disconnect(status?: number): void {
-  //   this.client.destroy();
-  //   mongoose.connection.close();
-  //   exit(status);
-  // }
+  /**
+   * Disconnect client and shut application
+   */
+  public disconnect(status?: number): void {
+    this.client.destroy();
+    disconnectMongo();
+    process.exit(status);
+  }
 
-  // /**
-  //  * Adds a guild command to the bot
-  //  *
-  //  * @param guildId GuildId in which command should be added
-  //  * @param command Command to add
-  //  */
-  // public addGuildCommand(guildId: Snowflake, command: Command): void {
-  //   let commandList: Command[] = this.guildCommands.get(guildId);
-  //   if (!commandList) {
-  //     commandList = [];
-  //   }
+  /**
+   * Loads module callbacks
+   *
+   * @param module Module from which callbacks should be loaded
+   */
+  private loadCallbacks(module: BotModule) {
+    if (module && module.getCallbacks()) {
+      module.getCallbacks().forEach((eventType) => {
+        this.client.on(eventType, module.getCallback(eventType));
+      });
+    }
+  }
 
-  //   commandList.push(command);
-  //   this.guildCommands.set(guildId, commandList);
-  // }
+  /**
+   * Loads module commands
+   *
+   * @param module Module from which commands should be loaded
+   * @returns Nothing
+   */
+  private loadCommands(module: BotModule) {
+    const commands = module.getCommands();
 
-  // /**
-  //  * Adds a global command to the bot
-  //  *
-  //  * @param command Global command to add
-  //  */
-  // public addGlobalCommand(command: Command): void {
-  //   if (!this.globalCommands.find((c) => c.name === command.name)) {
-  //     this.globalCommands.push(command);
-  //   }
-  // }
+    if (!commands) {
+      return;
+    }
 
-  // /**
-  //  * Publish every commands for the bot
-  //  *
-  //  * @returns A Promise which returns when publishing is done
-  //  */
-  // private async publishCommands(): Promise<void> {
-  //   try {
-  //     if (this.globalCommands && this.globalCommands.length > 0) {
-  //       await this.publishGlobalCommands();
-  //     }
+    commands.forEach((command: Command) => {
+      if (command.guildId) {
+        // Add guild command
+        let commandList: Command[] = this.guildCommands.get(command.guildId);
+        if (!commandList) {
+          commandList = [];
+        }
 
-  //     if (this.guildCommands && this.guildCommands.size > 0) {
-  //       this.guildCommands.forEach(async (commandList: Command[], guildId: string) => {
-  //         if (commandList && commandList.length > 0) {
-  //           await this.publishGuildCommands(guildId, commandList);
-  //         }
-  //       });
-  //     }
-  //   } catch (error) {
-  //     return Promise.reject();
-  //   }
+        commandList.push(command);
+        this.guildCommands.set(command.guildId, commandList);
+      } else if (!this.globalCommands.find((c) => c.name === command.name)) {
+        // Add global command if not already added
+        this.globalCommands.push(command);
+      }
+    });
+  }
 
-  //   return Promise.resolve();
-  // }
+  /**
+   * Publish every commands for the bot
+   *
+   * @returns A Promise which returns when publishing is done
+   */
+  private async publishCommands(): Promise<void> {
+    try {
+      if (this.globalCommands && this.globalCommands.length > 0) {
+        await this.publishGlobalCommands();
+      }
 
-  // /**
-  //  * Publish global commands
-  //  *
-  //  * @param commandList List of commands to publish
-  //  * @returns A Promise which returns when publishing is done
-  //  */
-  // private async publishGlobalCommands(): Promise<void> {
-  //   const commands = this.globalCommands.map((command) => {
-  //     return command.slashCommand.toJSON();
-  //   });
+      if (this.guildCommands && this.guildCommands.size > 0) {
+        this.guildCommands.forEach(async (commandList: Command[], guildId: string) => {
+          if (commandList && commandList.length > 0) {
+            await this.publishGuildCommands(guildId, commandList);
+          }
+        });
+      }
+    } catch (error) {
+      return Promise.reject();
+    }
 
-  //   try {
-  //     await this.restClient.put(Routes.applicationCommands(process.env.BOT_ID), { body: commands });
-  //   } catch (error) {
-  //     Logger.error('Error while publishing global commands! ' + error);
-  //     return Promise.reject();
-  //   }
-  // }
+    return Promise.resolve();
+  }
 
-  // /**
-  //  * Publish guild commands
-  //  *
-  //  * @param guildId Guild in which commands should be published
-  //  * @param commandList List of commands to publish
-  //  * @returns A Promise which returns when publishing is done
-  //  */
-  // private async publishGuildCommands(guildId: Snowflake, commandList: Command[]): Promise<void> {
-  //   const commands = commandList.map((command) => {
-  //     return command.slashCommand.toJSON();
-  //   });
+  /**
+   * Publish global commands
+   *
+   * @param commandList List of commands to publish
+   * @returns A Promise which returns when publishing is done
+   */
+  private async publishGlobalCommands(): Promise<void> {
+    const commands = this.globalCommands.map((command) => command.slashCommand.toJSON());
 
-  //   try {
-  //     await this.restClient.put(Routes.applicationGuildCommands(process.env.BOT_ID, guildId), { body: commands });
-  //   } catch (error) {
-  //     Logger.error(`Error while publishing commands for guild ${guildId} : ${error}`);
-  //     return Promise.reject();
-  //   }
-  // }
+    try {
+      await this.restClient.put(Routes.applicationCommands(process.env.BOT_ID), { body: commands });
+    } catch (error) {
+      const errorMessage = `Error while publishing global commands: ${error}`;
+      Logger.error(errorMessage);
+      Promise.reject(errorMessage);
+    }
 
-  // /**
-  //  * Defines what happens when a command interaction is received
-  //  *
-  //  * @param commandInteraction CommandInteraction received
-  //  * @returns A Promise which ends when command is executed
-  //  */
-  // private async onCommandInteraction(commandInteraction: CommandInteraction): Promise<void> {
-  //   let command: Command = null;
+    return Promise.resolve();
+  }
 
-  //   if (commandInteraction.guildId) {
-  //     const guildCommandList = this.guildCommands.get(commandInteraction.guildId);
+  /**
+   * Publish guild commands
+   *
+   * @param guildId Guild in which commands should be published
+   * @param commandList List of commands to publish
+   * @returns A Promise which returns when publishing is done
+   */
+  private async publishGuildCommands(guildId: Snowflake, commandList: Command[]): Promise<void> {
+    const commands = commandList.map((command) => command.slashCommand.toJSON());
 
-  //     if (guildCommandList && guildCommandList.length > 0) {
-  //       command = guildCommandList.find((c) => c.name === commandInteraction.commandName);
-  //     }
-  //   }
+    try {
+      await this.restClient.put(Routes.applicationGuildCommands(process.env.BOT_ID, guildId), { body: commands });
+    } catch (error) {
+      const errorMessage = `Error while publishing commands for guild ${guildId}: ${error}`;
+      Logger.error(errorMessage);
+      Promise.reject(errorMessage);
+    }
 
-  //   if (!command) {
-  //     command = this.globalCommands.find((c) => c.name === commandInteraction.commandName);
-  //   }
+    return Promise.resolve();
+  }
 
-  //   if (command) {
-  //     command.execution(commandInteraction);
-  //   } else {
-  //     console.warn(`Error: command ${commandInteraction.commandName} not found!`);
-  //     return;
-  //   }
-  // }
+  /**
+   * Defines what happens when a command interaction is received
+   *
+   * @param commandInteraction CommandInteraction received
+   * @returns A Void promise
+   */
+  private async onCommandInteraction(commandInteraction: CommandInteraction): Promise<void> {
+    let command: Command = null;
+
+    // Try to find command in guilds commands
+    if (commandInteraction.guildId) {
+      const guildCommandList = this.guildCommands.get(commandInteraction.guildId);
+
+      if (guildCommandList && guildCommandList.length > 0) {
+        command = guildCommandList.find((c) => c.name === commandInteraction.commandName);
+      }
+    }
+
+    // Try to find command in global commands
+    if (!command) {
+      command = this.globalCommands.find((c) => c.name === commandInteraction.commandName);
+    }
+
+    // Execute command if found
+    if (command) {
+      command.execution(commandInteraction);
+    } else {
+      Logger.warn(`Error: command ${commandInteraction.commandName} not found!`);
+    }
+  }
 }
 
 export default Bot;
