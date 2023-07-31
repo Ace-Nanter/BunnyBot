@@ -8,7 +8,7 @@ export default function SignInButton() {
   return (
     <button
       type="button"
-      className="group relative flex w-1/2 justify-center rounded-md border border-transparent bg-indigo-600 py-4 px-4 font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      className="group relative flex w-1/2 justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-4 font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
       onClick={() => signIn('discord')}
     >
       <span className="absolute inset-y-0 left-0 flex items-center pl-3">
