@@ -7,7 +7,7 @@ type CallbackMap = {
 
 export abstract class BotModule {
   protected readonly client: Client;
-  protected readonly guildId?: Snowflake;
+  public readonly guildId?: Snowflake;
   protected callbacks: CallbackMap;
   protected commands: Command[];
 

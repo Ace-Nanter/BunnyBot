@@ -1,14 +1,14 @@
 {
-  "name": "modules-administration",
+  "name": "modules-music",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/modules/administration/src",
+  "sourceRoot": "libs/modules/music/src",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/modules/administration/**/*.ts"]
+        "lintFilePatterns": ["libs/modules/music/**/*.ts"]
       }
     }
   },
