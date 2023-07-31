@@ -2,7 +2,16 @@ import { Logger } from '@BunnyBot/logger';
 import { BotModule, Command, IModuleConfig, ModuleConfig } from '@BunnyBot/modules/base';
 import { disconnectMongo } from '@BunnyBot/mongo-client';
 import { REST } from '@discordjs/rest';
-import { ChannelType, Client, CommandInteraction, GatewayIntentBits, Interaction, Routes, Snowflake } from 'discord.js';
+import {
+  ChannelType,
+  Client,
+  CommandInteraction,
+  Events,
+  GatewayIntentBits,
+  Interaction,
+  Routes,
+  Snowflake,
+} from 'discord.js';
 import initModule from './init-module';
 
 export class Bot {
@@ -70,7 +79,7 @@ export class Bot {
       }
     });
 
-    this.client.on('interactionCreate', async (interaction: Interaction) => {
+    this.client.on(Events.InteractionCreate, async (interaction: Interaction) => {
       if (!interaction.isCommand()) {
         return;
       }
@@ -256,7 +265,7 @@ export class Bot {
 
     // Execute command if found
     if (command) {
-      command.execution(commandInteraction);
+      await command.execution(commandInteraction);
     } else {
       Logger.warn(`Error: command ${commandInteraction.commandName} not found!`);
     }

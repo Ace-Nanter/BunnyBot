@@ -1,1 +1,1 @@
-export * from './lib/guild-messages-modules';
+export * from './lib/guild-messages-module';

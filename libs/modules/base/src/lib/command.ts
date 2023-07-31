@@ -5,12 +5,8 @@ import {
   SlashCommandSubcommandsOnlyBuilder,
   Snowflake,
 } from 'discord.js';
-import { BotModule } from './bot-module';
 
 export interface Command {
-  /** Module associated to the command */
-  module: BotModule;
-
   /** (Optional) Command's guild ID. Its presence tells if the command is a guild command. */
   guildId?: Snowflake;
 
@@ -21,10 +17,13 @@ export interface Command {
   description: string;
 
   /** SlashCommandBuilder */
-  slashCommand: SlashCommandBuilder | SlashCommandSubcommandBuilder | SlashCommandSubcommandsOnlyBuilder;
+  slashCommand:
+    | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>
+    | SlashCommandSubcommandBuilder
+    | SlashCommandSubcommandsOnlyBuilder;
 
   /** Command callback executed when the command is called */
-  execution: (interaction: CommandInteraction) => Promise<void>;
+  execution(interaction: CommandInteraction): Promise<void>;
 }
 
 export default Command;
