@@ -1,5 +1,5 @@
 import { Logger } from '@BunnyBot/logger';
-import { Command } from '@BunnyBot/modules/base';
+import { Command, replyAndDelete } from '@BunnyBot/modules/base';
 import { Client, CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { Activity } from '../models/activity.model';
 
@@ -42,16 +42,11 @@ export default class SetActivityCommand implements Command {
     };
 
     this.client.user.setActivity(activityDescription, activityOptions);
-
     Activity.findOneAndUpdate({}, { activity: activityDescription, options: activityOptions }, { upsert: true }).catch(
       (error) => Logger.error(error)
     );
 
-    return interaction.reply({ content: 'Activity set!' }).then(() => {
-      setTimeout(() => {
-        interaction.deleteReply();
-      }, 10000);
-    });
+    return replyAndDelete(interaction, 'Activity set!');
   }
 
   constructor(client: Client) {
