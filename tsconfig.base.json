@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@BunnyBot/logger": ["libs/logger/src/index.ts"],
+      "@BunnyBot/modules/administration": ["libs/modules/administration/src/index.ts"],
       "@BunnyBot/modules/base": ["libs/modules/base/src/index.ts"],
       "@BunnyBot/modules/guild-messages": ["libs/modules/guild-messages/src/index.ts"],
       "@BunnyBot/mongo-client": ["libs/mongo-client/src/index.ts"]

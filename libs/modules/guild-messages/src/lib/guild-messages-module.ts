@@ -44,7 +44,7 @@ export class GuildMessagesModule extends BotModule {
   /**
    * Retrieves all messages for the current guild and for given type
    *
-   * @param type Given type of messages which should be retrieved
+   * @param type Given type of messages which should  be retrieved
    * @returns A promise containing a list of guild messages
    */
   private async retrieveMessages(type: GuildMessageType): Promise<IGuildMessage[]> {
