@@ -22,7 +22,7 @@ export default function Sidebar({ guilds }: SidebarProps) {
     <>
       <MobileSidebar navigation={navigation} />
 
-      <div className="lg:bg-menu hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-gray-200 lg:pt-5 lg:pb-4">
+      <div className="lg:bg-menu hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-gray-200 lg:pb-4 lg:pt-5">
         <a href="/" className="flex flex-shrink-0 items-center justify-center space-x-5 px-6">
           <img className="h-8 w-auto" src={`/logos/${APP_MODE.toLowerCase()}.png`} alt={APP_NAME} />
           <span className="text-center text-lg font-semibold">{APP_NAME}</span>

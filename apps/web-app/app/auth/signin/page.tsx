@@ -11,7 +11,7 @@ export async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="space-y-8">
         <div>
           <img className="mx-auto h-12 w-auto" src={`/logos/${APP_MODE.toLowerCase()}.png`} alt={`${APP_NAME}`} />
