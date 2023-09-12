@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    # Publish `main` as Docker `latest` image.
+    branches:
+      - main
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checkAndBuild:
+    runs-on: ubuntu-latest
+    name: Lint & Build
+    permissions:
+      contents: 'read'
+      actions: 'read'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 18
+
+      - name: npm install
+        run: npm ci
+
+      - name: lint
+        run: npx nx run-many --target=lint --all=true --parallel=3
+
+      - name: build bot
+        run: npx nx build bot
+
+      - name: Archive builded js
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
+          retention-days: 1
+#   dockerize:
+#     runs-on: ubuntu-latest
+#     needs: checkAndBuild
+#     env:
+#       DOCKER_REGISTRY_HOST: docker-registry.pandore.ovh
+#       IMAGE_NAME: bunny-bot
+
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v3
+
+#     - name: Set up Docker Buildx
+#       uses: crazy-max/ghaction-docker-buildx@v3
+#       with:
+#         version: latest
+
+#     - name: Get lite node_modules
+#       run: npm install --only=prod
+
+#     - name: Download builded app
+#       uses: actions/download-artifact@v2
+#       with:
+#         name: dist
+#         path: dist
+
+#     - name: Prepare variables
+#       id: prepare-variables
+#       run: |
+#         IMAGE_ID=${{ env.DOCKER_REGISTRY_HOST }}/$IMAGE_NAME
+
+#         # Change all uppercase to lowercase
+#         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+#         # Strip git ref prefix from version
+#         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+#         # Strip "v" prefix from tag name
+#         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+#         # Use Docker `latest` tag convention
+#         [ "$VERSION" == "main" ] && VERSION=latest
+
+#         # If integration
+#         [ "${{ github.event_name }}" == "pull_request" ] && VERSION=integration
+
+#         echo ::set-output name=image::$IMAGE_ID
+#         echo ::set-output name=tag::$VERSION
+
+#     - name: Login to Docker Registry
+#       if: success()
+#       run: |
+#         echo "${{ secrets.DOCKER_REGISTRY_PASSWORD }}" | docker login ${{ env.DOCKER_REGISTRY_HOST }} --username "${{ secrets.DOCKER_REGISTRY_USERNAME }}" --password-stdin
+
+#     - name: Run Buildx (Build and push to integration)
+#       if: success()
+#       run: |
+#         docker buildx build --platform linux/amd64,linux/arm64 --tag ${{ steps.prepare-variables.outputs.image }}:${{ steps.prepare-variables.outputs.tag }} --output "type=image,push=true" .

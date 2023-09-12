@@ -1,0 +1,16 @@
+{
+  "name": "modules-guild-messages",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/modules/guild-messages/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/modules/guild-messages/**/*.ts"]
+      }
+    }
+  },
+  "tags": []
+}

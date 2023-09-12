@@ -1,0 +1,27 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@BunnyBot/logger": ["libs/logger/src/index.ts"],
+      "@BunnyBot/modules/administration": ["libs/modules/administration/src/index.ts"],
+      "@BunnyBot/modules/base": ["libs/modules/base/src/index.ts"],
+      "@BunnyBot/modules/guild-messages": ["libs/modules/guild-messages/src/index.ts"],
+      "@BunnyBot/modules/music": ["libs/modules/music/src/index.ts"],
+      "@BunnyBot/mongo-client": ["libs/mongo-client/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}
