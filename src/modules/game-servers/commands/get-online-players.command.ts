@@ -1,9 +1,9 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { Logger } from '../../../logger/logger';
-import MinecraftBaseCommand from './minecraft-base-command.model';
+import GameServersBaseCommand from './game-servers-base-command.model';
 
-export default class GetOnlinePlayersCommand extends MinecraftBaseCommand {
+export default class GetOnlinePlayersCommand extends GameServersBaseCommand {
   name = 'players';
   description = 'Tells which players are online';
 
@@ -14,10 +14,10 @@ export default class GetOnlinePlayersCommand extends MinecraftBaseCommand {
   execution = async (interaction: CommandInteraction): Promise<void> => {
     await interaction.deferReply();
 
-    Logger.info(`${interaction.user.username} used command 'minecraft players'`);
+    Logger.info(`${interaction.user.username} used command '${this.game} players'`);
 
     try {
-      const response = await this.minecraftModule.client.getOnlinePlayers();
+      const response = await this.gameServersModule.client.getOnlinePlayers(this.game);
       if (response.length > 0) {
         await interaction.editReply({ content: `Connected players: ${response.join(', ')}`});
       } else {

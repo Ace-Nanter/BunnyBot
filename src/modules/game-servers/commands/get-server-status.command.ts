@@ -1,11 +1,11 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { Logger } from '../../../logger/logger';
-import MinecraftBaseCommand from './minecraft-base-command.model';
+import GameServersBaseCommand from './game-servers-base-command.model';
 
-export default class GetServerStatusCommand extends MinecraftBaseCommand {
+export default class GetServerStatusCommand extends GameServersBaseCommand {
   name = 'status';
-  description = 'Tells if Minecraft server is offline or online';
+  description = 'Tells if game server is offline or online';
 
   slashCommand = new SlashCommandSubcommandBuilder()
     .setName(this.name)
@@ -14,9 +14,9 @@ export default class GetServerStatusCommand extends MinecraftBaseCommand {
   execution = async (interaction: CommandInteraction): Promise<void> => {
     await interaction.deferReply();
 
-    Logger.info(`${interaction.user.username} used command 'minecraft status'`);
+    Logger.info(`${interaction.user.username} used command '${this.game} status'`);
 
-    const response = await this.minecraftModule.client.getServerStatus();
+    const response = await this.gameServersModule.client.getServerStatus(this.game);
 
     switch(response) {
       case 'STARTED':
