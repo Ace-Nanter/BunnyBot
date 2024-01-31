@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { Logger } from '../../../logger/logger';
-import MinecraftBaseCommand from './minecraft-base-command.model';
+import MinecraftBaseCommand from './game-servers-base-command.model';
 
 export default class StopServerCommand extends MinecraftBaseCommand {
   name = 'stop';
@@ -14,10 +14,10 @@ export default class StopServerCommand extends MinecraftBaseCommand {
   execution = async (interaction: CommandInteraction): Promise<void> => {
     await interaction.deferReply();
 
-    Logger.info(`${interaction.user.username} used command 'minecraft stop'`);
+    Logger.info(`${interaction.user.username} used command '${this.game} stop'`);
 
     try {
-      await this.minecraftModule.client.stopServer();
+      await this.gameServersModule.client.stopServer(this.game);
       await interaction.editReply({ content: `🔴 Server is stopping...`});
     } catch (error) {
       await interaction.editReply({ content: error});
