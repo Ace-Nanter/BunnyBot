@@ -20,10 +20,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Setup node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: 16.x
 
@@ -37,7 +37,7 @@ jobs:
       run: npm run build
       
     - name: Archive builded js
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist
@@ -52,18 +52,16 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       
     - name: Set up Docker Buildx      
-      uses: crazy-max/ghaction-docker-buildx@v3
-      with:
-        version: latest
+      uses: docker/setup-buildx-action@v3
 
     - name: Get lite node_modules
       run: npm install --only=prod
 
     - name: Download builded app
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist
