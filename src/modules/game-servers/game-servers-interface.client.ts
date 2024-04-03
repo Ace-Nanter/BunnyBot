@@ -61,7 +61,7 @@ export class GameServersInterfaceClient {
   }
 
   /**
-   * Stops Minecraft server
+   * Stops game server
    */
   async stopServer(game: string): Promise<void> {
     try {
