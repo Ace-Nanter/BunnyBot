@@ -1,11 +1,11 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { Logger } from '../../../logger/logger';
-import MinecraftBaseCommand from './game-servers-base-command.model';
+import GameServersBaseCommand from './game-servers-base-command.model';
 
-export default class StopServerCommand extends MinecraftBaseCommand {
+export default class StopServerCommand extends GameServersBaseCommand {
   name = 'stop';
-  description = 'Stops Minecraft server';
+  description = 'Stops game server';
 
   slashCommand = new SlashCommandSubcommandBuilder()
     .setName(this.name)

@@ -13,6 +13,7 @@ export class GameServersModule extends BotModule {
   protected initCommands(): void {
     this.commands.push(new GameServerCommandClass(this, 'minecraft'));
     this.commands.push(new GameServerCommandClass(this, 'palworld'));
+    this.commands.push(new GameServerCommandClass(this, 'ark'));
   }
 
   protected async initModule(params?: any[]): Promise<void> {
