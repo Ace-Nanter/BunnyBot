@@ -1,9 +1,9 @@
-FROM node:16
+FROM node:24
 
 # Create app directory
 WORKDIR /usr/src/app
 
-RUN apt-get update || : && apt-get install python -y
+RUN apt-get update || : && apt-get install python3 -y
 RUN apt-get install ffmpeg -y
 
 # Install app dependencies
