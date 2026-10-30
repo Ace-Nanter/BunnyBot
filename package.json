@@ -2,6 +2,9 @@
   "name": "bunny-bot",
   "version": "2.4.0",
   "description": "An awesome discord bot !",
+  "engines": {
+    "node": ">=24"
+  },
   "main": "app.js",
   "dependencies": {
     "@discordjs/builders": "^1.0.0",
