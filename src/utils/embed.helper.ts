@@ -1,14 +1,14 @@
-import { ColorResolvable, Message, MessageEmbed, TextBasedChannel } from 'discord.js';
+import { ColorResolvable, Message, EmbedBuilder, TextBasedChannel, GuildTextBasedChannel } from 'discord.js';
 
 export class EmbedHelper {
 
   /**
    * @param color the color to use for the embed
    * @param description (optional) the description for the embed
-   * @returns a new MessageEmbed with the given colouring
+   * @returns a new EmbedBuilder with the given colouring
    */
-  public static createColouredEmbed(color: ColorResolvable, description?: string): MessageEmbed {
-    const embed = new MessageEmbed().setColor(color);
+  public static createColouredEmbed(color: ColorResolvable, description?: string): EmbedBuilder {
+    const embed = new EmbedBuilder().setColor(color);
 
     if(description) {
       embed.setDescription(description);
@@ -25,6 +25,6 @@ export class EmbedHelper {
    * @returns a promise for the sent message
    */
    public static createAndSendEmbed(channel: TextBasedChannel, description?: string): Promise<Message> {
-    return channel.send({ embeds: [EmbedHelper.createColouredEmbed('BLUE', description)] });
+    return (channel as GuildTextBasedChannel).send({ embeds: [EmbedHelper.createColouredEmbed('Blue', description)] });
   }
 }
