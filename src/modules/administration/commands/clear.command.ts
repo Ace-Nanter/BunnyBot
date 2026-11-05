@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, TextChannel } from 'discord.js';
+import { ChatInputCommandInteraction, TextChannel } from 'discord.js';
 import { Logger } from '../../../logger/logger';
 import { Command } from '../../../models/command.model';
 
@@ -15,9 +15,10 @@ export default class ClearCommand extends Command {
     .setDescription('Number of messages which should be deleted')
     .setRequired(true)
   )
-  .setDefaultPermission(false);
+  .setDefaultMemberPermissions(0)
+  .setDMPermission(true);
 
-  execution = async (interaction: CommandInteraction): Promise<void> => {
+  execution = async (interaction: ChatInputCommandInteraction): Promise<void> => {
     const count = interaction.options.getInteger('count');
     
     if(count < 1 || count > 99) {

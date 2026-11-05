@@ -1,6 +1,6 @@
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import { Client, CommandInteraction, Intents, Interaction, Snowflake } from 'discord.js';
+import { ChatInputCommandInteraction, Client, GatewayIntentBits, Interaction, Snowflake, ChannelType } from 'discord.js';
 import * as mongoose from 'mongoose';
 import { exit } from 'process';
 import { Logger } from './logger/logger';
@@ -40,16 +40,16 @@ export class Bot {
 
   private constructor() {
     this.client = new Client({ intents: [
-      Intents.FLAGS.GUILDS,
-      Intents.FLAGS.GUILD_MEMBERS,
-      Intents.FLAGS.GUILD_BANS,
-      Intents.FLAGS.GUILD_VOICE_STATES,
-      Intents.FLAGS.GUILD_MESSAGES,
-      Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-      Intents.FLAGS.GUILD_PRESENCES,
-      Intents.FLAGS.GUILD_INVITES,
-      Intents.FLAGS.DIRECT_MESSAGES,
-      Intents.FLAGS.DIRECT_MESSAGE_REACTIONS
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildBans,
+      GatewayIntentBits.GuildVoiceStates,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.GuildMessageReactions,
+      GatewayIntentBits.GuildPresences,
+      GatewayIntentBits.GuildInvites,
+      GatewayIntentBits.DirectMessages,
+      GatewayIntentBits.DirectMessageReactions
     ]});
     this.restClient = new REST({ version: '9' }).setToken(process.env.TOKEN);
 
@@ -78,11 +78,11 @@ export class Bot {
     });
 
     this.client.on('interactionCreate', async (interaction: Interaction) => {
-      if (!interaction.isCommand()) {
+      if (!interaction.isChatInputCommand()) {
         return ; 
       }
   
-      this.onCommandInteraction(interaction as CommandInteraction);
+      this.onCommandInteraction(interaction as ChatInputCommandInteraction);
     })
 
     this.client.on('disconnect', function () {
@@ -93,7 +93,7 @@ export class Bot {
   private async initLogger() {
     if (process.env.LOG_CHANNEL_ID) {
       const channel = await this.client.channels.fetch(process.env.LOG_CHANNEL_ID);
-      if (channel && channel.type === 'GUILD_TEXT') {
+      if (channel && channel.type === ChannelType.GuildText) {
         Logger.setLoggerType(LoggerType.DiscordLogger, channel);
       }
     }
@@ -220,7 +220,7 @@ export class Bot {
    * @param commandInteraction CommandInteraction received
    * @returns A Promise which ends when command is executed
    */
-  private async onCommandInteraction(commandInteraction: CommandInteraction): Promise<void> {
+  private async onCommandInteraction(commandInteraction: ChatInputCommandInteraction): Promise<void> {
 
     let command: Command = null;
 

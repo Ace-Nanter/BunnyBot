@@ -5,7 +5,7 @@ import { Command } from './command.model';
 export abstract class BotModule {
   
   protected readonly guildId: Snowflake;
-  protected callbacks: Map<keyof ClientEvents, ((...args: ClientEvents[keyof ClientEvents]) => void)>;
+  protected callbacks: Map<keyof ClientEvents, ((...args: any[]) => void)>;
   protected commands: Command[];
 
   constructor(guildId?: Snowflake) {
@@ -39,7 +39,7 @@ export abstract class BotModule {
       Array.from(this.callbacks.keys()) : null;
   }
 
-  getCallback(eventType: (keyof ClientEvents)): ((...args: ClientEvents[keyof ClientEvents]) => void) {
-    return this.callbacks.get(eventType);
+  getCallback(eventType: (keyof ClientEvents)): ((...args: any[]) => void) {
+    return this.callbacks.get(eventType) as (...args: any[]) => void;
   }
 }
