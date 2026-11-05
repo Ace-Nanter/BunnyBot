@@ -1,4 +1,5 @@
-import { ButtonInteraction, CommandInteraction, GuildMember, Interaction, MessageActionRow, MessageButton, MessageSelectMenu, MessageSelectOptionData, Modal, ModalActionRowComponent, ModalSubmitInteraction, TextInputComponent } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, GuildMember, Interaction, MessageFlags, ModalSubmitInteraction, StringSelectMenuBuilder, GuildTextBasedChannel, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import type { APISelectMenuOption } from "discord-api-types/v10";
 import { Logger } from "../../../logger/logger";
 import { Game, IGame } from "../models/game.model";
 
@@ -7,24 +8,24 @@ export class MessageHelper {
   public static async sendSendMessageModal(interaction: ButtonInteraction): Promise<void> {
 
     // Create the modal
-		const modal = new Modal()
+		const modal = new ModalBuilder()
       .setCustomId('games-roles-send-message')
       .setTitle('Send a button for people to choose roles');
     
     // Add components to modal
-    const messageInput = new TextInputComponent()
+    const messageInput = new TextInputBuilder()
       .setCustomId('message-content')
       .setLabel("What should be the message content?")
-      .setStyle('PARAGRAPH');
+      .setStyle(TextInputStyle.Paragraph);
   
-    const buttonInput = new TextInputComponent()
+    const buttonInput = new TextInputBuilder()
       .setCustomId('button-content')
       .setLabel("What should be the button content?")
-      .setStyle('SHORT');
+      .setStyle(TextInputStyle.Short);
 
     modal.addComponents(
-      new MessageActionRow<ModalActionRowComponent>().addComponents(messageInput),
-      new MessageActionRow<ModalActionRowComponent>().addComponents(buttonInput)
+      new ActionRowBuilder<TextInputBuilder>().addComponents(messageInput),
+      new ActionRowBuilder<TextInputBuilder>().addComponents(buttonInput)
     );
     
     // Show the modal to the user
@@ -38,21 +39,21 @@ export class MessageHelper {
    */
   public static async sendJoinMessage(interaction: ModalSubmitInteraction): Promise<void> {
 
-    const messageActionRow = new MessageActionRow();
+    const messageActionRow = new ActionRowBuilder<ButtonBuilder>();
 
     // Message content
     const messageContent: string = interaction.fields.getTextInputValue('message-content');
     const buttonContent: string = interaction.fields.getTextInputValue('button-content');
 
     // Join button
-    const button = new MessageButton()
+    const button = new ButtonBuilder()
       .setCustomId('games-roles-join')
       .setEmoji('🎮')
       .setLabel(buttonContent ? buttonContent : 'Join a game')
-      .setStyle("SUCCESS");
+      .setStyle(ButtonStyle.Success);
 
     messageActionRow.addComponents(button);
-    await interaction.channel.send({ content: messageContent, components: [messageActionRow] });
+    await (interaction.channel as GuildTextBasedChannel).send({ content: messageContent, components: [messageActionRow] });
     await interaction.deferReply();
     await interaction.deleteReply();
   }
@@ -65,23 +66,25 @@ export class MessageHelper {
    public static async sendGameSelectionMenu(interaction: Interaction): Promise<void> {
 
     if (interaction.isButton()) {
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     }
 
-    const messageActionRow = new MessageActionRow();
-    const selectMenu = new MessageSelectMenu();
+    const messageActionRow = new ActionRowBuilder<StringSelectMenuBuilder>();
+    const selectMenu = new StringSelectMenuBuilder();
     selectMenu.setCustomId('games-roles-join-selected');
     selectMenu.setPlaceholder('Choose a game')
     
     const games = await Game.getGamesWithRolesForGuild(interaction.guildId);
-    const options: MessageSelectOptionData[] = await Promise.all(games.map(async (game: IGame) => {
+    // Cast preserved from v13 behavior: the map may yield `undefined` when a
+    // game without a role throws at runtime ; original code did the same.
+    const options: APISelectMenuOption[] = (await Promise.all(games.map(async (game: IGame) => {
       try {
         const selected: boolean = await MessageHelper.getGameRoleForUser(game, interaction.member as GuildMember);
         return { label: game.gameName, value: game.applicationId, default: selected };
       } catch (error) {
         Logger.warn(error);
       }
-    }));
+    }))) as APISelectMenuOption[];
 
     selectMenu.setOptions(options);
     selectMenu.setMinValues(0);
@@ -89,7 +92,7 @@ export class MessageHelper {
     messageActionRow.addComponents(selectMenu);
     
     
-    await (interaction as ButtonInteraction | CommandInteraction)
+    await (interaction as ButtonInteraction | ChatInputCommandInteraction)
       .editReply({ content: 'Choose the game role you want to join', embeds: [], components: [ messageActionRow ] });
   }
 

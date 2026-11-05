@@ -1,4 +1,4 @@
-import { OAuth2Guild, Snowflake } from "discord.js";
+import { OAuth2Guild, Snowflake, PermissionFlagsBits } from "discord.js";
 import { Bot } from "../bot";
 
 export class GuildHelper {
@@ -26,7 +26,7 @@ export class GuildHelper {
       return foundGuild.roles.fetch().then(roles => {
         const userIds = [];
 
-        roles.filter(role => role.permissions.has('ADMINISTRATOR')).forEach(role => {
+        roles.filter(role => role.permissions.has(PermissionFlagsBits.Administrator)).forEach(role => {
           role.members.forEach(member => { 
             userIds.push(member.id);
           }); 

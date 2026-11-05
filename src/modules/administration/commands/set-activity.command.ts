@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Bot } from '../../../bot';
 import { Logger } from '../../../logger/logger';
 import { Command } from '../../../models/command.model';
@@ -27,9 +27,10 @@ export default class SetActivityCommand extends Command {
     .setDescription('URL if type is STREAMING or LISTENING')
     .setRequired(false)
   )
-  .setDefaultPermission(false);
+  .setDefaultMemberPermissions(0)
+  .setDMPermission(true);
 
-  execution = async (interaction: CommandInteraction): Promise<void> => {
+  execution = async (interaction: ChatInputCommandInteraction): Promise<void> => {
     const activityDescription = interaction.options.getString('activity');
     const activityOptions = {
       type: interaction.options.getInteger('type'),

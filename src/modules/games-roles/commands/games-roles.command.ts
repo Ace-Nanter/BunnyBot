@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, MessageFlags } from 'discord.js';
 import { Command } from '../../../models/command.model';
 import { MessageHelper } from '../helpers/message.helper';
 
@@ -12,8 +12,8 @@ export default class GamesRolesCommand extends Command {
     .setName(this.name)
     .setDescription(this.description)
   
-  execution = async (interaction: CommandInteraction): Promise<void> => {
-    await interaction.deferReply({ ephemeral: true });
+  execution = async (interaction: ChatInputCommandInteraction): Promise<void> => {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     MessageHelper.sendGameSelectionMenu(interaction);
   };
 }
