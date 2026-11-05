@@ -1,4 +1,4 @@
-import { GuildMember, MessageReaction, Role, Message, Guild, TextChannel, User, Snowflake } from "discord.js";
+import { GuildMember, MessageReaction, Role, Message, Guild, User, Snowflake } from "discord.js";
 import { Bot } from "../bot";
 import { Logger } from "../logger/logger";
 import { BotModule } from "../models/bot-module.model";
@@ -44,12 +44,9 @@ export class NewRoleModule extends BotModule {
       // Get message
       if (guild && params[CHANNEL_ID] && params[MESSAGE_ID]) {
         const channel = guild.channels.resolve(params[CHANNEL_ID]);
-        // Note: the original code tested the truthiness of the `isText`
-        // method reference on the channel — i.e. merely "channel is not
-        // null". `if (channel)` preserves exactly that behavior.
-        if (channel) {
+        if (channel?.isTextBased()) {
           try {
-            message = await (channel as TextChannel).messages.fetch(params[MESSAGE_ID]);
+            message = await channel.messages.fetch(params[MESSAGE_ID]);
           }
           catch (e) {
             Logger.error(`NewComerModule: Unable to find message to watch: ${e}`);
