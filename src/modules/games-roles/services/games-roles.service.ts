@@ -1,4 +1,4 @@
-import { CategoryChannel, Guild, Permissions, Role, Snowflake, TextChannel } from "discord.js";
+import { CategoryChannel, Guild, PermissionsBitField, ChannelType, Role, Snowflake, TextChannel } from "discord.js";
 import { IGame } from "../models/game.model";
 
 export class GamesRolesService {
@@ -28,17 +28,18 @@ export class GamesRolesService {
     const channelName = game.gameName.replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().replace(/\s/g, '-');
     const everyoneRole = this.guild.roles.everyone;
 
-    return this.guild.channels.create(channelName, {
-      type: 'GUILD_TEXT',
+    return this.guild.channels.create({
+      name: channelName,
+      type: ChannelType.GuildText,
       parent: this.gameCategory,
       permissionOverwrites: [
-        { 
+        {
           id: everyoneRole.id,
-          deny: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+          deny: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages]
         },
         {
           id: roleId,
-          allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+          allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages]
         }
       ]
     });

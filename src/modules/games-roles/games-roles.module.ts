@@ -1,4 +1,4 @@
-import { ButtonInteraction, CategoryChannel, Guild, GuildMember, Interaction, MessageFlags, ModalSubmitInteraction, SelectMenuInteraction, MessageEmbed } from 'discord.js';
+import { ButtonInteraction, CategoryChannel, EmbedBuilder, Guild, GuildMember, Interaction, MessageFlags, ModalSubmitInteraction, StringSelectMenuInteraction } from 'discord.js';
 import { Bot } from '../../bot';
 import { Logger } from '../../logger/logger';
 import { BotModule } from '../../models/bot-module.model';
@@ -92,8 +92,8 @@ export class GamesRolesModule extends BotModule {
       this.manageButtonInteraction(interaction as ButtonInteraction); 
     }
     
-    if (interaction.isSelectMenu()) {
-      this.manageSelectMenuInteractions(interaction as SelectMenuInteraction);
+    if (interaction.isStringSelectMenu()) {
+      this.manageSelectMenuInteractions(interaction as StringSelectMenuInteraction);
     }
 
     if (interaction.isModalSubmit()) {
@@ -140,7 +140,7 @@ export class GamesRolesModule extends BotModule {
         break;
       default:
         Logger.error(`Unknown button interaction! CustomId: ${interaction.customId}`);
-        await interaction.reply({ content: 'Unknown button interaction!', ephemeral: true });
+        await interaction.reply({ content: 'Unknown button interaction!', flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -149,7 +149,7 @@ export class GamesRolesModule extends BotModule {
    * 
    * @param interaction Interaction received
    */
-  private manageSelectMenuInteractions(interaction: SelectMenuInteraction): Promise<void> {
+  private manageSelectMenuInteractions(interaction: StringSelectMenuInteraction): Promise<void> {
     if (!interaction.customId.startsWith('games-roles-')) {
       return ;
     }
@@ -173,7 +173,7 @@ export class GamesRolesModule extends BotModule {
       
       default:
         Logger.error(`Unknown select menu interaction! CustomId: ${interaction.customId}`);
-        interaction.reply({ content: 'Unknown select menu interaction!', ephemeral: true });
+        interaction.reply({ content: 'Unknown select menu interaction!', flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -205,7 +205,7 @@ export class GamesRolesModule extends BotModule {
    * @param interaction Interaction received containing selected roles 
    * @returns Nothing
    */
-  private async manageJoinInteraction(interaction: SelectMenuInteraction): Promise<void> {
+  private async manageJoinInteraction(interaction: StringSelectMenuInteraction): Promise<void> {
     await interaction.deferUpdate();
 
     if (!interaction.values) return ;
@@ -222,12 +222,12 @@ export class GamesRolesModule extends BotModule {
     }));
 
     const message = await interaction.editReply({ content: 'Roles updated!', components: []});
-    if (message.flags != MessageFlags.FLAGS.EPHEMERAL) {
+    if (!message.flags.has(MessageFlags.Ephemeral)) {
       setTimeout(() => { interaction.deleteReply(); }, 5000);
     }
   }
 
-  private async manageInteractionForGame(interaction: SelectMenuInteraction, game: IGame, member: GuildMember) {
+  private async manageInteractionForGame(interaction: StringSelectMenuInteraction, game: IGame, member: GuildMember) {
 
     // Get guildGame
     const guildGame = game.guildGames.find(g => g.guildId === interaction.guildId);
@@ -257,7 +257,7 @@ export class GamesRolesModule extends BotModule {
     const applicationId = interaction.customId.replace(/games-roles-ban-game-/g,'');
 
     await Game.updateOne({ applicationId: applicationId }, { banned: true });
-    const messageEmbed = new MessageEmbed()
+    const messageEmbed = new EmbedBuilder()
       .setColor('#FF0000')
       .setDescription(`Game with applicationId ${applicationId} was banned`)
       .setTitle('Log');

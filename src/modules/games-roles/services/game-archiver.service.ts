@@ -1,5 +1,6 @@
 
-import { ButtonInteraction, CategoryChannel, Guild, MessageActionRow, MessageSelectMenu, MessageSelectOptionData, Role, SelectMenuInteraction } from "discord.js";
+import { ButtonInteraction, CategoryChannel, Guild, ActionRowBuilder, StringSelectMenuBuilder, Role, StringSelectMenuInteraction, TextChannel } from "discord.js";
+import type { APISelectMenuOption } from "discord-api-types/v10";
 import { Logger } from "../../../logger/logger";
 import { Game, IGame } from "../models/game.model";
 import { IGuildGame } from "../models/guild-game.model";
@@ -23,13 +24,13 @@ export class GameArchiver extends GamesRolesService {
 
     await interaction.deferUpdate();
 
-    const messageActionRow = new MessageActionRow();
-    const selectMenu = new MessageSelectMenu();
+    const messageActionRow = new ActionRowBuilder<StringSelectMenuBuilder>();
+    const selectMenu = new StringSelectMenuBuilder();
     selectMenu.setCustomId('games-roles-archive');
     selectMenu.setPlaceholder('Choose a game to archive');
 
     const games = await Game.getGamesWithChannelsForGuild(interaction.guildId);
-    const options: MessageSelectOptionData[] = games.map((game: IGame) => { return { label: game.gameName, value: game.applicationId }; });
+    const options: APISelectMenuOption[] = games.map((game: IGame) => { return { label: game.gameName, value: game.applicationId }; });
 
     selectMenu.setOptions(options);
     messageActionRow.addComponents(selectMenu);
@@ -46,13 +47,13 @@ export class GameArchiver extends GamesRolesService {
 
     await interaction.deferUpdate();
 
-    const messageActionRow = new MessageActionRow();
-    const selectMenu = new MessageSelectMenu();
+    const messageActionRow = new ActionRowBuilder<StringSelectMenuBuilder>();
+    const selectMenu = new StringSelectMenuBuilder();
     selectMenu.setCustomId('games-roles-unarchive');
     selectMenu.setPlaceholder('Choose a game to unarchive');
 
     const games = await Game.getArchivedGamesForGuild(interaction.guildId);
-    const options: MessageSelectOptionData[] = games.map((game: IGame) => { return { label: game.gameName, value: game.applicationId }; });
+    const options: APISelectMenuOption[] = games.map((game: IGame) => { return { label: game.gameName, value: game.applicationId }; });
 
     selectMenu.setOptions(options);
     messageActionRow.addComponents(selectMenu);
@@ -66,7 +67,7 @@ export class GameArchiver extends GamesRolesService {
    * @param interaction Interaction containing which game should be unarchived
    * @returns Nothing
    */
-  public async archiveGame(interaction: SelectMenuInteraction): Promise<void> {
+  public async archiveGame(interaction: StringSelectMenuInteraction): Promise<void> {
     await interaction.deferUpdate();
 
     if (!interaction.values) return ;
@@ -89,7 +90,7 @@ export class GameArchiver extends GamesRolesService {
 
     // Move channel
     const channel = await this.guild.channels.fetch(guildGame.channelId);
-    channel.setParent(this.archiveCategory);
+    (channel as TextChannel).setParent(this.archiveCategory);
 
     // Backup role and delete it
     const role = await this.guild.roles.fetch(guildGame.roleId);
@@ -110,7 +111,7 @@ export class GameArchiver extends GamesRolesService {
    * @param interaction Interaction containing which game should be unarchived
    * @returns Nothing
    */
-  public async unarchiveGame(interaction: SelectMenuInteraction): Promise<void> {
+  public async unarchiveGame(interaction: StringSelectMenuInteraction): Promise<void> {
     await interaction.deferUpdate();
 
     if (!interaction.values) return ;
@@ -137,7 +138,7 @@ export class GameArchiver extends GamesRolesService {
 
     // Move back channel
     const channel = await this.guild.channels.fetch(guildGame.channelId);
-    channel.setParent(this.gameCategory);
+    (channel as TextChannel).setParent(this.gameCategory);
 
     guildGame.archived = false;
     await game.save();

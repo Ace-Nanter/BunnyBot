@@ -1,4 +1,4 @@
-import { ButtonInteraction, CategoryChannel, Guild, MessageActionRow, MessageEmbed, Modal, ModalActionRowComponent, ModalSubmitInteraction, Role, TextInputComponent } from "discord.js";
+import { ActionRowBuilder, ButtonInteraction, CategoryChannel, EmbedBuilder, Guild, ModalBuilder, ModalSubmitInteraction, Role, TextInputBuilder, TextInputStyle } from "discord.js";
 import { Game } from "../models/game.model";
 import { GamesRolesService } from "./games-roles.service";
 
@@ -16,18 +16,18 @@ export class GameCreator extends GamesRolesService {
    public async sendCreateGameModal(interaction: ButtonInteraction): Promise<void> {
     
     // Create the modal
-    const modal = new Modal()
+    const modal = new ModalBuilder()
       .setCustomId('games-roles-create-game')
       .setTitle('Add a new game in my list');
 
     // Add components to modal
-    const gameInput = new TextInputComponent()
+    const gameInput = new TextInputBuilder()
       .setCustomId('game-name')
       .setLabel("What's the game name?")
-      .setStyle('SHORT');
+      .setStyle(TextInputStyle.Short);
 
     modal.addComponents(
-      new MessageActionRow<ModalActionRowComponent>().addComponents(gameInput)
+      new ActionRowBuilder<TextInputBuilder>().addComponents(gameInput)
     );
   
     // Show the modal to the user
@@ -70,12 +70,12 @@ export class GameCreator extends GamesRolesService {
     await game.save();
 
     // Confirmation message
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setAuthor({
-        name: interaction.guild.me.displayName,
-        iconURL: interaction.guild.me.displayAvatarURL()
+        name: interaction.guild.members.me.displayName,
+        iconURL: interaction.guild.members.me.displayAvatarURL()
       })
-      .setColor('GREEN')
+      .setColor('Green')
       .setDescription(`Game **${game.gameName}** created!`)
       .setFields(
         { name: 'Role', value: `<@&${role.id}>`},

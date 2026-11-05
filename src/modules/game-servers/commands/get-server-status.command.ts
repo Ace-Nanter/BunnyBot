@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Logger } from '../../../logger/logger';
 import GameServersBaseCommand from './game-servers-base-command.model';
 
@@ -11,7 +11,7 @@ export default class GetServerStatusCommand extends GameServersBaseCommand {
     .setName(this.name)
     .setDescription(this.description);
 
-  execution = async (interaction: CommandInteraction): Promise<void> => {
+  execution = async (interaction: ChatInputCommandInteraction): Promise<void> => {
     await interaction.deferReply();
 
     Logger.info(`${interaction.user.username} used command '${this.game} status'`);
