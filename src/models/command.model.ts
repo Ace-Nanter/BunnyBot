@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandsOnlyBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { SlashCommandBuilder, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandsOnlyBuilder } from '@discordjs/builders';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { BotModule } from './bot-module.model';
 export abstract class Command {
 
@@ -7,8 +7,8 @@ export abstract class Command {
 
   abstract name: string;
   abstract description: string;
-  abstract slashCommand: SlashCommandBuilder | SlashCommandSubcommandBuilder | SlashCommandSubcommandsOnlyBuilder;
-  abstract execution: (interaction: CommandInteraction) => Promise<void>;
+  abstract slashCommand: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandBuilder | SlashCommandSubcommandsOnlyBuilder;
+  abstract execution: (interaction: ChatInputCommandInteraction) => Promise<void>;
 
   public constructor(module: BotModule) {
     this.module = module;
