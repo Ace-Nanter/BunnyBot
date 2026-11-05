@@ -61,7 +61,7 @@ export class GuildMessagesModule extends BotModule {
     try {
       const channel: Channel = await this.guild.channels.fetch(message.channelId);
 
-      if (!channel || !channel.isText()) {
+      if (!channel || !channel.isTextBased()) {
         Logger.warn('Error: given channel does not exist or is not a text channel!');
       }
 

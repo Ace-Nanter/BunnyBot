@@ -1,4 +1,3 @@
-import { ActivityTypes } from 'discord.js/typings/enums';
 import { Bot } from '../../bot';
 import { BotModule } from "../../models/bot-module.model";
 import { default as ClearCommandClass } from './commands/clear.command';

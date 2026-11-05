@@ -44,7 +44,10 @@ export class NewRoleModule extends BotModule {
       // Get message
       if (guild && params[CHANNEL_ID] && params[MESSAGE_ID]) {
         const channel = guild.channels.resolve(params[CHANNEL_ID]);
-        if (channel.isText) {
+        // Note: the original code tested the truthiness of the `isText`
+        // method reference on the channel — i.e. merely "channel is not
+        // null". `if (channel)` preserves exactly that behavior.
+        if (channel) {
           try {
             message = await (channel as TextChannel).messages.fetch(params[MESSAGE_ID]);
           }
