@@ -1,5 +1,5 @@
 import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v9';
+import { Routes } from 'discord-api-types/v10';
 import { ChatInputCommandInteraction, Client, GatewayIntentBits, Interaction, Snowflake, ChannelType } from 'discord.js';
 import * as mongoose from 'mongoose';
 import { exit } from 'process';
@@ -51,7 +51,7 @@ export class Bot {
       GatewayIntentBits.DirectMessages,
       GatewayIntentBits.DirectMessageReactions
     ]});
-    this.restClient = new REST({ version: '9' }).setToken(process.env.TOKEN);
+    this.restClient = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
     this.globalCommands = [];
     this.guildCommands = new Map();
@@ -61,7 +61,7 @@ export class Bot {
 
     this.client.login(process.env.TOKEN);
 
-    this.client.once('ready', async () => {
+    this.client.once('clientReady', async () => {
       try {
         // Launch Logger
         await this.initLogger();
