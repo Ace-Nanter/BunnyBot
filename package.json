@@ -8,7 +8,7 @@
   "main": "app.js",
   "dependencies": {
     "@discordjs/builders": "^1.0.0",
-    "@discordjs/opus": "^0.8.0",
+    "@discordjs/opus": "^0.11.0",
     "@discordjs/rest": "^1.0.0",
     "@discordjs/voice": "^0.11.0",
     "axios": "^1.20.0",
@@ -52,12 +52,12 @@
     "brace-expansion": "1.1.21",
     "braces": "3.0.3",
     "flatted": "3.4.2",
-    "follow-redirects": "1.16.0",
+    "follow-redirects": "1.16.2",
     "js-yaml": "3.15.2",
     "minimatch": "3.1.4",
     "picomatch": "2.3.2",
     "ws": "8.21.0",
-    "tar": "6.2.1",
+    "tar": "7.5.22",
     "undici": "5.29.0",
     "axios": {
       "form-data": "4.0.6"
@@ -68,5 +68,8 @@
     "@types/node-fetch": {
       "form-data": "3.0.5"
     }
+  },
+  "allowScripts": {
+    "@discordjs/opus": true
   }
 }
