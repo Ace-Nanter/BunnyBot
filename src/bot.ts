@@ -1,6 +1,6 @@
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
-import { ChatInputCommandInteraction, Client, GatewayIntentBits, Interaction, Snowflake, ChannelType } from 'discord.js';
+import { ChatInputCommandInteraction, Client, ClientEvents, GatewayIntentBits, Interaction, Snowflake, ChannelType } from 'discord.js';
 import * as mongoose from 'mongoose';
 import { exit } from 'process';
 import { Logger } from './logger/logger';
@@ -99,6 +99,20 @@ export class Bot {
     }
   }
 
+  /**
+   * Single localized bridge between a runtime event key and the exact
+   * per-event argument tuple it names: TypeScript cannot narrow the
+   * `keyof ClientEvents` union down to the single key held at runtime,
+   * so the per-event correlation is done in this generic helper instead
+   * of falling back to `any`.
+   */
+  private addModuleCallback<K extends keyof ClientEvents>(
+    eventType: K,
+    handler: (...args: ClientEvents[K]) => void
+  ): void {
+    this.client.on(eventType, handler);
+  }
+
   private async loadModules(moduleConfigList: IModuleConfig[]) {
     await moduleConfigList.forEach(async (moduleConfig: IModuleConfig) => {
       try {
@@ -107,7 +121,7 @@ export class Bot {
         // Load module events
         if (module && module.getCallbacks()) {
           module.getCallbacks().forEach(eventType => {
-            this.client.on(eventType, module.getCallback(eventType));
+            this.addModuleCallback(eventType, module.getCallback(eventType));
           });
         }
       } catch (error) {
