@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonInteraction, CategoryChannel, EmbedBuilder, Guild, ModalActionRowComponent, ModalBuilder, ModalSubmitInteraction, Role, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ActionRowBuilder, ButtonInteraction, CategoryChannel, EmbedBuilder, Guild, ModalBuilder, ModalSubmitInteraction, Role, TextInputBuilder, TextInputStyle } from "discord.js";
 import { Game } from "../models/game.model";
 import { GamesRolesService } from "./games-roles.service";
 
