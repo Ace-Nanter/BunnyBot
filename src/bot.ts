@@ -172,7 +172,7 @@ export class Bot {
           }
         })
       }
-    } catch(error) {
+    } catch {
       return Promise.reject();
     }
 

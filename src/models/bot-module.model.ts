@@ -22,7 +22,11 @@ export abstract class BotModule {
     this.initCommands();
 
     this.commands.forEach((command: Command) => {
-      this.guildId ? Bot.getInstance().addGuildCommand(this.guildId, command) : Bot.getInstance().addGlobalCommand(command);
+      if (this.guildId) {
+        Bot.getInstance().addGuildCommand(this.guildId, command);
+      } else {
+        Bot.getInstance().addGlobalCommand(command);
+      }
     })
 
     if (params) {
